@@ -68,16 +68,13 @@ Engine.prototype.step = function(dt) {
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
 
-    // 1. if inlet port is open, let some air in (proportional to pressure difference and port area)
+    // if inlet port is open, let some air in (proportional to pressure difference and port area)
     let inletAirParticles = pressuredifference * inletPortArea * this.airflowrate;
 
-    // 2. if exhaust port is open, let some air out (proportional to pressure difference and port area)
+    // if exhaust port is open, let some air out (proportional to pressure difference and port area)
     let exhaustAirParticles = this.cylinderpressure * exhaustPortArea * this.airflowrate;
 
-    // 3. calculate updated cylinder pressure
-    this.cylinderpressure = (currentAirParticles + inletAirParticles - exhaustAirParticles) / currentVolume;
-
-    // 4. calculate torque from piston
+    // calculate torque from piston
     pistonForce = 1000 * this.cylinderpressure * (pistonArea * 0.000001); // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation;
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
@@ -89,7 +86,7 @@ Engine.prototype.step = function(dt) {
     let oldrpm = this.rpm;
     this.rpm += crankTorque / this.flywheelmomentofinertia * dt;
 
-    // 6. apply friction torque
+    // apply friction torque
     let friction_deltarpm = this.frictiontorque / this.flywheelmomentofinertia * dt;
     if (Math.abs(friction_deltarpm) > Math.abs(this.rpm)) {
         this.rpm = 0;
@@ -116,6 +113,10 @@ Engine.prototype.step = function(dt) {
     while (this.crankposition > 360) this.crankposition -= 360;
 
     this.computeCylinderPosition();
+
+    // calculate updated cylinder pressure
+    let newVolume = this.pistonheight * pistonArea;
+    this.cylinderpressure = (currentAirParticles + inletAirParticles - exhaustAirParticles) / newVolume;
 };
 
 Engine.prototype.computeCylinderPosition = function() {
