@@ -70,6 +70,11 @@ Engine.prototype.step = function(dt) {
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
+    // TODO: problem is that when timestep is too high,
+    // we let in so much air that the cylinder pressure
+    // would exceed the inlet pressure! Because we just multiply
+    // rate of change of pressure by dt
+
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
     let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
 
