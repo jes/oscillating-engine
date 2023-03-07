@@ -15,8 +15,8 @@ function Engine() {
     this.pivotseparation = 67.5; // mm
     this.flywheelmomentofinertia = 1.7e-4; // kg m^2
     this.inletpressure = 20; // kPa
-    this.frictiontorque = 0.001; // Nm, opposing the flywheel rotation
-    this.airflowrate = 100; // TODO: units???
+    this.frictiontorque = 0.0005; // Nm, opposing the flywheel rotation
+    this.airflowrate = 100; // TODO: units??? this is something to do with how quickly air will flow through a given diameter at a given pressure difference
 
     // state:
     this.cylinderpressure = 0; // kPa
@@ -87,7 +87,7 @@ Engine.prototype.step = function(dt) {
         this.rpm += friction_deltarpm;
     }
 
-    this.rpm -= this.rpm * 0.01*dt;
+    this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
     // 7. update crank position (first pass)
     this.crankposition += (this.rpm * 360 / 60) * dt;

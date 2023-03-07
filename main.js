@@ -8,6 +8,8 @@ var piston_height_px = 10;
 var canvasmargin = 20; // px
 var px_per_mm;
 
+var maxrpm = 0;
+
 function setup() {
     canvas = createCanvas(400, 400);
     canvas.parent('canvas');
@@ -30,7 +32,9 @@ function draw() {
     drawPorts();
     drawPivot();
 
+    if (engine.rpm > maxrpm) maxrpm = engine.rpm;
     document.getElementById('rpm').innerText = Math.round(engine.rpm);
+    document.getElementById('maxrpm').innerText = Math.round(maxrpm);
 }
 
 function drawFlywheel() {
