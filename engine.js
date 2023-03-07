@@ -3,7 +3,7 @@ function Engine() {
     // parameters:
     this.crankthrow = 15; // mm
     this.portthrow = 12; // mm
-    this.deadspace = 5; // mm, between top of piston and top of cylinder
+    this.deadspace = 4.75; // mm, between top of piston and top of cylinder
     this.bore = 15; // mm
     this.rodlength = 63; // mm
     this.inletportdiameter = 2.5; // mm
