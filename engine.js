@@ -1,5 +1,4 @@
 
-var stop = false;
 function Engine() {
     // parameters:
     this.crankthrow = 15; // mm
@@ -33,7 +32,6 @@ function Engine() {
 }
 
 Engine.prototype.step = function(dt) {
-    if (stop) return;
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
     let stroke = this.crankthrow*2;
     let currentVolume = this.pistonheight * pistonArea;
@@ -56,6 +54,10 @@ Engine.prototype.step = function(dt) {
     this.cylinderporty = cylinderPortY;
 
     // compute port overlap areas
+    // TODO: if the ports don't lie within the cylinder, or are
+    // the wrong side of the piston surface, then we get less
+    // area; want the are of intersection of the inlet port,
+    // cylinder port, and area of cylinder above piston
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
 

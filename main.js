@@ -22,7 +22,7 @@ function setup() {
 }
 
 function draw() {
-    engine.step(deltaTime / 1000.0);
+    engine.step(0.1 * deltaTime / 1000.0);
 
     background(220);
 
@@ -33,8 +33,9 @@ function draw() {
     drawPivot();
 
     if (engine.rpm > maxrpm) maxrpm = engine.rpm;
-    document.getElementById('rpm').innerText = Math.round(engine.rpm);
-    document.getElementById('maxrpm').innerText = Math.round(maxrpm);
+    document.getElementById('rpm').innerText = Math.round(engine.rpm*100)/100;
+    document.getElementById('maxrpm').innerText = Math.round(maxrpm*100)/100;
+    document.getElementById('pressure').innerText = Math.round(engine.cylinderpressure*100)/100;
 }
 
 function drawFlywheel() {
