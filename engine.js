@@ -15,7 +15,7 @@ function Engine() {
     this.flywheelmomentofinertia = 1.7e-4; // kg m^2
     this.inletpressure = 20; // kPa
     this.frictiontorque = 0.0005; // Nm, opposing the flywheel rotation
-    this.airflowrate = 100; // TODO: units??? this is something to do with how quickly air will flow through a given diameter at a given pressure difference
+    this.airflowrate = 100000; // TODO: units??? this is something to do with how quickly air will flow through a given diameter at a given pressure difference
 
     // state:
     this.cylinderpressure = 0; // kPa
@@ -69,10 +69,10 @@ Engine.prototype.step = function(dt) {
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
-    let inletAirParticles = pressuredifference * inletPortArea * this.airflowrate;
+    let inletAirParticles = pressuredifference * inletPortArea * this.airflowrate * dt;
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
-    let exhaustAirParticles = this.cylinderpressure * exhaustPortArea * this.airflowrate;
+    let exhaustAirParticles = this.cylinderpressure * exhaustPortArea * this.airflowrate * dt;
 
     // calculate torque from piston
     pistonForce = 1000 * this.cylinderpressure * (pistonArea * 0.000001); // Newtons
