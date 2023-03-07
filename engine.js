@@ -13,12 +13,15 @@ function Engine() {
     this.exhaustportangle = 14.5; // degrees
     this.pivotseparation = 67.5; // mm
     this.flywheelmomentofinertia = 1.7e-4; // kg m^2
-    this.inletpressure = 20; // kPa
+    this.atmosphericpressure = 101.325; // kPa
+    this.inletpressure = this.atmosphericpressure + 20; // kPa
     this.frictiontorque = 0.0005; // Nm, opposing the flywheel rotation
-    this.airflowrate = 100000; // TODO: units??? this is something to do with how quickly air will flow through a given diameter at a given pressure difference
+    this.airflowrate = 0.000001; // kg/(mm^2.kPa.sec) - TODO?
+    this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
+    this.speedofsound = 343; // m/s
 
     // state:
-    this.cylinderpressure = 0; // kPa
+    this.cylinderpressure = this.atmosphericpressure; // kPa
     this.crankposition = 0; // degrees - TDC=0
     this.rpm = 50; // rpm
 
@@ -41,9 +44,8 @@ function Engine() {
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
     let stroke = this.crankthrow*2;
-    let currentVolume = this.pistonheight * pistonArea;
-    let currentAirParticles = this.cylinderpressure * currentVolume;
-    let pressuredifference = this.inletpressure - this.cylinderpressure;
+    let currentVolume = this.pistonheight * pistonArea; // mm^3
+    let currentAirMass = (this.cylinderpressure/this.atmosphericpressure) * (currentVolume*1e-9) * this.airdensity; // kg
 
     // compute the effective port locations
     let inletPortX = sin(this.inletportangle * Math.PI/180) * this.portthrow;
@@ -65,30 +67,31 @@ Engine.prototype.step = function(dt) {
     // the wrong side of the piston surface, then we get less
     // area; want the are of intersection of the inlet port,
     // cylinder port, and area of cylinder above piston
-    let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
-    let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2);
+    let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
+    let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
-    let inletAirParticles = pressuredifference * inletPortArea * this.airflowrate * dt;
+    let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
-    let exhaustAirParticles = this.cylinderpressure * exhaustPortArea * this.airflowrate * dt;
+    let exhaustAirMass = this.airFlow(this.cylinderpressure, this.atmosphericpressure, exhaustPortArea) * dt; // kg
 
     // calculate torque from piston
     pistonForce = 1000 * this.cylinderpressure * (pistonArea * 0.000001); // Newtons
-    pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation;
+    pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
 
     this.sumtorque += crankTorque;
     this.torquepoints++;
 
     // calculate flywheel angular velocity with piston torque
-    let oldrpm = this.rpm;
-    this.rpm += crankTorque / this.flywheelmomentofinertia * dt;
+    let angularacceleration = crankTorque / this.flywheelmomentofinertia; // rad/s^2
+    this.rpm += (angularacceleration / (120*Math.PI)) * dt;
 
     // apply friction torque
-    let friction_deltarpm = this.frictiontorque / this.flywheelmomentofinertia * dt;
-    if (Math.abs(friction_deltarpm) > Math.abs(this.rpm)) {
+    let friction_angaccel = this.frictiontorque / this.flywheelmomentofinertia; // rad/s^2
+    let friction_deltarpm = Math.abs((friction_angaccel / (120*Math.PI)) * dt);
+    if (friction_deltarpm > Math.abs(this.rpm)) {
         this.rpm = 0;
     } else if (this.rpm > 0) {
         this.rpm -= friction_deltarpm;
@@ -115,8 +118,10 @@ Engine.prototype.step = function(dt) {
     this.computeCylinderPosition();
 
     // calculate updated cylinder pressure
-    let newVolume = this.pistonheight * pistonArea;
-    this.cylinderpressure = (currentAirParticles + inletAirParticles - exhaustAirParticles) / newVolume;
+    let newVolume = this.pistonheight * pistonArea; // mm^3
+    let newAirMass = currentAirMass + inletAirMass - exhaustAirMass; // kg
+    let pressureRatio = newAirMass / (newVolume*1e-9 * this.airdensity);
+    this.cylinderpressure = pressureRatio * this.atmosphericpressure;
 };
 
 Engine.prototype.computeCylinderPosition = function() {
@@ -132,7 +137,18 @@ Engine.prototype.computeCylinderPosition = function() {
     // 3. find height of piston
     let dist = Math.sqrt(dx*dx + dy*dy);
     this.pistonheight = this.deadspace + this.crankthrow + dist - this.pivotseparation;
-}
+};
+
+// return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
+Engine.prototype.airFlow = function(pressure1, pressure2, area) {
+    // cap the pressure difference at a factor of 1.8
+    // TODO: this should somehow relate to the speed of sound?
+    //if (pressure1 > 1.8*pressure2) pressure1 = 1.8*pressure2;
+    //if (pressure2 > 1.8*pressure1) pressure2 = 1.8*pressure1;
+
+    let pressuredifference = pressure1 - pressure2;
+    return pressuredifference * area * this.airflowrate;
+};
 
 // https://math.stackexchange.com/a/290526
 function areaOfIntersection(x0, y0, r0, x1, y1, r1) {

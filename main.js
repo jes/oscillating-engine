@@ -23,7 +23,7 @@ function setup() {
 
 function draw() {
     //engine.step(0.1 * deltaTime / 1000.0);
-    engine.step(0.001);
+    engine.step(0.01);
 
     background(220);
 
@@ -36,7 +36,7 @@ function draw() {
     if (engine.rpm > maxrpm) maxrpm = engine.rpm;
     document.getElementById('rpm').innerText = Math.round(engine.rpm*100)/100;
     document.getElementById('maxrpm').innerText = Math.round(maxrpm*100)/100;
-    document.getElementById('pressure').innerText = Math.round(engine.cylinderpressure*100)/100;
+    document.getElementById('pressure').innerText = Math.round((engine.cylinderpressure-engine.atmosphericpressure)*100)/100;
     document.getElementById('torque').innerText = Math.round(engine.torque*10000)/10000;
     document.getElementById('meanrpm').innerText = Math.round(engine.meanrpm*100)/100;
     document.getElementById('power').innerText = Math.round(engine.power*1000)/1000;
@@ -79,7 +79,7 @@ function drawCylinder() {
     noStroke();
     let atmospheric_colour = color(0,255,255);
     let inlet_colour = color(255,0,0);
-    let gas_colour = lerpColor(atmospheric_colour, inlet_colour, engine.cylinderpressure/engine.inletpressure);
+    let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.cylinderpressure-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
     gas_colour.setAlpha(127);
     fill(gas_colour);
     rect(-cylinder_width_px/2, -pivot_height_mm*px_per_mm, cylinder_width_px, engine.pistonheight * px_per_mm); // cylinder gases
