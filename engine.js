@@ -28,6 +28,13 @@ function Engine() {
     this.crankpinx = 0; // mm from crank centre
     this.crankpiny = 0; // mm from crank centre
 
+    this.sumtorque = 0;
+    this.sumrpm = 0;
+    this.torquepoints = 0;
+    this.torque = 0;
+    this.meanrpm = 0;
+    this.power = 0;
+
     this.computeCylinderPosition();
 }
 
@@ -75,7 +82,10 @@ Engine.prototype.step = function(dt) {
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation;
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
 
-    // 5. calculate flywheel angular velocity with piston torque
+    this.sumtorque += crankTorque;
+    this.torquepoints++;
+
+    // calculate flywheel angular velocity with piston torque
     let oldrpm = this.rpm;
     this.rpm += crankTorque / this.flywheelmomentofinertia * dt;
 
@@ -91,8 +101,18 @@ Engine.prototype.step = function(dt) {
 
     this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
-    // 7. update crank position (first pass)
+    this.sumrpm += this.rpm;
+
+    // update crank position (first pass)
     this.crankposition += (this.rpm * 360 / 60) * dt;
+    if (this.crankposition > 360) {
+        this.torque = this.sumtorque / this.torquepoints;
+        this.meanrpm = this.sumrpm / this.torquepoints;
+        this.power = this.torque * Math.PI * this.meanrpm / 30;
+        this.sumtorque = 0;
+        this.sumrpm = 0;
+        this.torquepoints = 0;
+    }
     while (this.crankposition > 360) this.crankposition -= 360;
 
     this.computeCylinderPosition();

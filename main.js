@@ -22,7 +22,8 @@ function setup() {
 }
 
 function draw() {
-    engine.step(0.1 * deltaTime / 1000.0);
+    //engine.step(0.1 * deltaTime / 1000.0);
+    engine.step(0.001);
 
     background(220);
 
@@ -36,6 +37,10 @@ function draw() {
     document.getElementById('rpm').innerText = Math.round(engine.rpm*100)/100;
     document.getElementById('maxrpm').innerText = Math.round(maxrpm*100)/100;
     document.getElementById('pressure').innerText = Math.round(engine.cylinderpressure*100)/100;
+    document.getElementById('torque').innerText = Math.round(engine.torque*10000)/10000;
+    document.getElementById('meanrpm').innerText = Math.round(engine.meanrpm*100)/100;
+    document.getElementById('power').innerText = Math.round(engine.power*1000)/1000;
+    document.getElementById('horsepower').innerText = Math.round(engine.power/746*100000)/100000;
 }
 
 function drawFlywheel() {
