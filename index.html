@@ -9,11 +9,16 @@
 
 <div id="canvas"></div>
 
-<span id="rpm">0</span> rpm (<span id="maxrpm">0</span> max.)
-<br>
-<span id="pressure">0</span> kPa
-<br>
-<span id="torque">0</span> Nm @ <span id="meanrpm">0</span> rpm = <span id="power">0</span> W = <span id="horsepower">0</span> hp
+<div id="status">
+    <label for="timefactor"><span id="timefactorlabel">1.00</span>x</label>
+    <input type="range" min="1" max="100" value="100" id="timefactor"><br>
+    <button id="reset">Reset</button> <button id="kick">Kick</button><br>
+    <span id="rpm">0</span> rpm (<span id="maxrpm">0</span> max.)
+    <br>
+    <span id="pressure">0</span> kPa
+    <br>
+    <span id="torque">0</span> Nm @ <span id="meanrpm">0</span> rpm = <span id="power">0</span> W = <span id="horsepower">0</span> hp
+</div>
 
 <script src="p5.min.js"></script>
 <script src="engine.js"></script>

@@ -21,9 +21,9 @@ function Engine() {
     this.speedofsound = 343; // m/s
 
     // state:
-    this.cylinderpressure = this.atmosphericpressure; // kPa
+    this.cylinderpressure = 0; // kPa
     this.crankposition = 0; // degrees - TDC=0
-    this.rpm = 200; // rpm
+    this.rpm = 0; // rpm
 
     // computed state:
     this.cylinderangle = 0; // degrees
@@ -38,8 +38,15 @@ function Engine() {
     this.meanrpm = 0;
     this.power = 0;
 
+    this.reset();
     this.computeCylinderPosition();
 }
+
+Engine.prototype.reset = function() {
+    this.cylinderpressure = this.atmosphericpressure;
+    this.crankposition = 0;
+    this.rpm = 100;
+};
 
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);

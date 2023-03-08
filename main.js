@@ -23,7 +23,8 @@ function setup() {
 
 function draw() {
     let secs = deltaTime / 1000.0;
-    let timeFactor = 0.1;
+    let timeFactor = val('timefactor')/100;
+    txt('timefactorlabel', timeFactor);
     let stepTime = 0.0001;
     let steps = timeFactor * secs/stepTime;
     if (steps > 10000) steps = 10000;
@@ -137,3 +138,17 @@ function drawPivot() {
     circle(canvas.width/2, pivot_centre_px, 2);
 }
 
+function btn(id, cb) {
+    document.getElementById(id).onclick = cb;
+}
+
+function val(id) {
+    return document.getElementById(id).value;
+}
+
+function txt(id, val) {
+    document.getElementById(id).innerText = val;
+}
+
+btn('kick', function() { engine.rpm += 100 });
+btn('reset', function() { engine.reset() });
