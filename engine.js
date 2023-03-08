@@ -118,7 +118,7 @@ Engine.prototype.step = function(dt) {
         this.sumrpm = 0;
         this.torquepoints = 0;
     }
-    while (this.crankposition > 360) this.crankposition -= 360;
+    this.crankposition %= 360.0; // XXX: modulo of float?
 
     this.computeCylinderPosition();
 
