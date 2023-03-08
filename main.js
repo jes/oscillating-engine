@@ -22,8 +22,13 @@ function setup() {
 }
 
 function draw() {
-    //engine.step(0.1 * deltaTime / 1000.0);
-    engine.step(0.01);
+    let secs = deltaTime / 1000.0;
+    let timeFactor = 0.1;
+    let stepTime = 0.0001;
+    let steps = timeFactor * secs/stepTime;
+    if (steps > 10000) steps = 10000;
+    for (let i = 0; i < steps; i++)
+        engine.step(stepTime);
 
     background(220);
 
