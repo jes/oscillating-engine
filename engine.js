@@ -12,18 +12,18 @@ function Engine() {
     this.inletportangle = -14.5; // degrees
     this.exhaustportangle = 14.5; // degrees
     this.pivotseparation = 67.5; // mm
-    this.flywheelmomentofinertia = 1.7e-4; // kg m^2
+    this.flywheelmomentofinertia = 7.3e-8; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 20; // kPa
-    this.frictiontorque = 0.0005; // Nm, opposing the flywheel rotation
-    this.airflowrate = 0.000001; // kg/(mm^2.kPa.sec) - TODO?
+    this.frictiontorque = 0.006; // Nm, opposing the flywheel rotation
+    this.airflowrate = 0.00001; // kg/(mm^2.kPa.sec) - TODO?
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
 
     // state:
     this.cylinderpressure = this.atmosphericpressure; // kPa
     this.crankposition = 0; // degrees - TDC=0
-    this.rpm = 50; // rpm
+    this.rpm = 200; // rpm
 
     // computed state:
     this.cylinderangle = 0; // degrees
@@ -82,7 +82,7 @@ Engine.prototype.step = function(dt) {
     let exhaustAirMass = this.airFlow(this.cylinderpressure, this.atmosphericpressure, exhaustPortArea) * dt; // kg
 
     // calculate torque from piston
-    pistonForce = 1000 * this.cylinderpressure * (pistonArea * 0.000001); // Newtons
+    pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
 
