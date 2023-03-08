@@ -26,8 +26,26 @@
 </div>
 
 <div id="params" style="float:left">
-    <h2>Params</h2>
+    <h2>Engine parameters</h2>
+    <label for="crankthrow">Crank throw:</label> <input type="text" id="crankthrow" value="15"> mm<br>
+    <label for="portthrow">Port throw:</label> <input type="text" id="portthrow" value="12"> mm<br>
+    <label for="deadspace">Dead space:</label> <input type="text" id="deadspace" value="4.75"> mm<br>
     <label for="bore">Bore: </label> <input type="text" id="bore" value="15"> mm<br>
+    <label for="rodlength">Rod length: </label> <input type="text" id="rodlength" value="63"> mm<br>
+    <label for="inletportdiameter">Inlet port diameter: </label> <input type="text" id="inletportdiameter" value="2.5"> mm<br>
+    <label for="exhaustportdiameter">Exhaust port diameter: </label> <input type="text" id="exhaustportdiameter" value="2.5"> mm<br>
+    <label for="cylinderportdiameter">Cylinder port diameter: </label> <input type="text" id="cylinderportdiameter" value="2.0"> mm<br>
+    <label for="inletportangle">Inlet port angle: </label> <input type="text" id="inletportangle" value="-14.5"> &deg;<br>
+    <label for="exhaustportangle">Exhaust port angle: </label> <input type="text" id="exhaustportangle" value="14.5"> &deg;<br>
+    <label for="pivotseparation">Pivot separation: </label> <input type="text" id="pivotseparation" value="67.5"> mm<br>
+    <label for="flywheelmomentofinertia">Flywheel moment of inertia: </label> <input type="text" id="flywheelmomentofinertia" value="0.000000073"> kg m<sup>-2</sup><br>
+
+    <h2>Simulation parameters</h2>
+    <label for="atmosphericpressure">Atmospheric pressure: </label> <input type="text" id="atmosphericpressure" value="101.325"> kPa<br>
+    <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="20"> kPa above atmosphere<br>
+    <label for="frictiontorque">Friction torque: </label> <input type="text" id="frictiontorque" value="0.006"> Nm<br>
+    <label for="airflowrate">Air flow rate: </label> <input type="text" id="airflowrate" value="10"> kg m<sup>-2</sup> kPa<sup>-1</sup> s<sup>-1</sup><br>
+    <label for="airdensity">Air density: </label> <input type="text" id="airdensity" value="1.205"> kg m<sup>-3</sup> at atmospheric pressure<br>
 </div>
 
 <script src="p5.min.js"></script>

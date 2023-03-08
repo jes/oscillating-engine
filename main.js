@@ -21,13 +21,31 @@ function setup() {
 
     validate('bore', (x) => x > 0);
 
+    }
+
+function draw() {
+    engine.crankthrow = val('crankthrow');
+    engine.portthrow = val('portthrow');
+    engine.deadspace = val('deadspace');
+    engine.bore = val('bore');
+    engine.rodlength = val('rodlength');
+    engine.inletportdiameter = val('inletportdiameter');
+    engine.exhaustportdiameter = val('exhaustportdiameter');
+    engine.cylinderportdiameter = val('cylinderportdiameter');
+    engine.inletportangle = val('inletportangle');
+    engine.exhaustportangle = val('exhaustportangle');
+    engine.pivotseparation = val('pivotseparation');
+    engine.flywheelmomentofinertia = val('flywheelmomentofinertia');
+
+    engine.atmosphericpressure = val('atmosphericpressure');
+    engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
+    engine.frictiontorque = val('frictiontorque');
+    engine.airflowrate = val('airflowrate');
+    engine.airdensity = val('airdensity');
+
     let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
-}
-
-function draw() {
-    engine.bore = val('bore');
 
     let secs = deltaTime / 1000.0;
     let timeFactor = val('timefactor')/100;
@@ -49,7 +67,7 @@ function draw() {
     if (engine.rpm > maxrpm) maxrpm = engine.rpm;
     txt('rpm', round(engine.rpm, 2));
     txt('maxrpm', round(maxrpm, 2));
-    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure), 2);
+    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
     txt('torque', round(engine.torque, 5));
     txt('meanrpm', round(engine.meanrpm, 2));
     txt('power', round(engine.power, 3));
@@ -75,7 +93,9 @@ function drawCylinder() {
 
     // height of pivot from top of cylinder
     let pivot_height_mm = engine.deadspace + engine.crankthrow + engine.rodlength - engine.pivotseparation;
-    let pivot_height_px = canvasmargin + pivot_height_mm * px_per_mm;
+
+    let diameter = flywheeldiameter * px_per_mm;
+    let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
     // cylinder dimensions
     let cylinder_height_mm = engine.deadspace + 2*engine.crankthrow;
@@ -83,7 +103,7 @@ function drawCylinder() {
     let cylinder_height_px = cylinder_height_mm * px_per_mm + piston_height_px
     let cylinder_width_px = cylinder_width_mm * px_per_mm;
 
-    translate(canvas.width/2, pivot_height_px);
+    translate(canvas.width/2, pivot_centre_px);
     rotate(engine.cylinderangle * PI/180);
 
     rect(-cylinder_width_px/2, -pivot_height_mm*px_per_mm, cylinder_width_px, cylinder_height_px); // main cylinder
@@ -139,7 +159,6 @@ function drawPorts() {
 
 function drawPivot() {
     let diameter = flywheeldiameter * px_per_mm;
-
     let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
     circle(canvas.width/2, pivot_centre_px, 2);

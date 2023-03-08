@@ -16,7 +16,7 @@ function Engine() {
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 20; // kPa
     this.frictiontorque = 0.006; // Nm, opposing the flywheel rotation
-    this.airflowrate = 0.00001; // kg/(mm^2.kPa.sec) - TODO?
+    this.airflowrate = 10; // kg/(m^2.kPa.sec) - TODO?
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
 
@@ -159,7 +159,7 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     //if (pressure2 > 1.8*pressure1) pressure2 = 1.8*pressure1;
 
     let pressuredifference = pressure1 - pressure2;
-    return pressuredifference * area * this.airflowrate;
+    return pressuredifference * area * this.airflowrate*1e-6;
 };
 
 // https://math.stackexchange.com/a/290526
