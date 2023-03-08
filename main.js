@@ -40,13 +40,13 @@ function draw() {
     drawPivot();
 
     if (engine.rpm > maxrpm) maxrpm = engine.rpm;
-    document.getElementById('rpm').innerText = Math.round(engine.rpm*100)/100;
-    document.getElementById('maxrpm').innerText = Math.round(maxrpm*100)/100;
-    document.getElementById('pressure').innerText = Math.round((engine.cylinderpressure-engine.atmosphericpressure)*100)/100;
-    document.getElementById('torque').innerText = Math.round(engine.torque*10000)/10000;
-    document.getElementById('meanrpm').innerText = Math.round(engine.meanrpm*100)/100;
-    document.getElementById('power').innerText = Math.round(engine.power*1000)/1000;
-    document.getElementById('horsepower').innerText = Math.round(engine.power/746*100000)/100000;
+    txt('rpm', round(engine.rpm, 2));
+    txt('maxrpm', round(maxrpm, 2));
+    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure), 2);
+    txt('torque', round(engine.torque, 5));
+    txt('meanrpm', round(engine.meanrpm, 2));
+    txt('power', round(engine.power, 3));
+    txt('horsepower', round(engine.power/746, 5));
 }
 
 function drawFlywheel() {
@@ -148,6 +148,10 @@ function val(id) {
 
 function txt(id, val) {
     document.getElementById(id).innerText = val;
+}
+
+function round(num, places) {
+    return Math.round(num * Math.pow(10,places))/Math.pow(10,places);
 }
 
 btn('kick', function() { engine.rpm += 100 });
