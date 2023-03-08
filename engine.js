@@ -104,7 +104,7 @@ Engine.prototype.step = function(dt) {
         this.rpm += friction_deltarpm;
     }
 
-    this.rpm -= this.rpm * 0.1*dt; // TODO: ???
+    //this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
     this.sumrpm += this.rpm;
 
