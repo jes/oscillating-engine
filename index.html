@@ -2,22 +2,32 @@
 <html>
 <head>
     <title>Oscillating engine simulator</title>
+<style type="text/css">
+.error { background:#f88 }
+</style>
 </head>
 <body>
 
 <h1>Oscillating engine simulator</h1>
 
+<div style="float:left; width:440px">
 <div id="canvas"></div>
 
 <div id="status">
     <label for="timefactor"><span id="timefactorlabel">1.00</span>x</label>
-    <input type="range" min="1" max="100" value="100" id="timefactor"><br>
-    <button id="reset">Reset</button> <button id="kick">Kick</button><br>
+    <input type="range" min="1" max="100" value="10" id="timefactor"><br>
+    <button id="reset">Kick</button><br>
     <span id="rpm">0</span> rpm (<span id="maxrpm">0</span> max.)
     <br>
     <span id="pressure">0</span> kPa
     <br>
     <span id="torque">0</span> Nm @ <span id="meanrpm">0</span> rpm = <span id="power">0</span> W = <span id="horsepower">0</span> hp
+</div>
+</div>
+
+<div id="params" style="float:left">
+    <h2>Params</h2>
+    <label for="bore">Bore: </label> <input type="text" id="bore" value="15"> mm<br>
 </div>
 
 <script src="p5.min.js"></script>

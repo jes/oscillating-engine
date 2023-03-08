@@ -10,11 +10,16 @@ var px_per_mm;
 
 var maxrpm = 0;
 
+var validators = {};
+var lastgoodvalue = {};
+
 function setup() {
     canvas = createCanvas(400, 400);
     canvas.parent('canvas');
 
     engine = new Engine();
+
+    validate('bore', (x) => x > 0);
 
     let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
@@ -22,6 +27,8 @@ function setup() {
 }
 
 function draw() {
+    engine.bore = val('bore');
+
     let secs = deltaTime / 1000.0;
     let timeFactor = val('timefactor')/100;
     txt('timefactorlabel', timeFactor);
@@ -143,7 +150,21 @@ function btn(id, cb) {
 }
 
 function val(id) {
-    return document.getElementById(id).value;
+    let formvalue = parseFloat(document.getElementById(id).value);
+    let vals = validators[id];
+    if (vals) {
+        for (let i = 0; i < vals.length; i++) {
+            let cb = vals[i];
+            if (!cb(formvalue)) {
+                // validation failed
+                document.getElementById(id).classList.add('error');
+                return lastgoodvalue[id];
+            }
+        }
+    }
+    document.getElementById(id).classList.remove('error');
+    lastgoodvalue[id] = formvalue;
+    return formvalue;
 }
 
 function txt(id, val) {
@@ -154,5 +175,9 @@ function round(num, places) {
     return Math.round(num * Math.pow(10,places))/Math.pow(10,places);
 }
 
-btn('kick', function() { engine.rpm += 100 });
-btn('reset', function() { engine.reset() });
+function validate(id, cb) {
+    validators[id] ||= [];
+    validators[id].push(cb);
+}
+
+btn('reset', function() { engine.reset(); maxrpm = 0; });

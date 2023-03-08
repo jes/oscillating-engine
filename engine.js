@@ -31,21 +31,21 @@ function Engine() {
     this.crankpinx = 0; // mm from crank centre
     this.crankpiny = 0; // mm from crank centre
 
-    this.sumtorque = 0;
-    this.sumrpm = 0;
-    this.torquepoints = 0;
-    this.torque = 0;
-    this.meanrpm = 0;
-    this.power = 0;
-
     this.reset();
-    this.computeCylinderPosition();
 }
 
 Engine.prototype.reset = function() {
     this.cylinderpressure = this.atmosphericpressure;
     this.crankposition = 0;
     this.rpm = 100;
+    this.computeCylinderPosition();
+
+    this.sumtorque = 0;
+    this.sumrpm = 0;
+    this.torquepoints = 0;
+    this.torque = 0;
+    this.meanrpm = 0;
+    this.power = 0;
 };
 
 Engine.prototype.step = function(dt) {
