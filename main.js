@@ -1,5 +1,6 @@
 var canvas;
 var engine;
+var pvdiagram;
 
 var flywheeldiameter = 68; // mm
 
@@ -13,11 +14,15 @@ var maxrpm = 0;
 var validators = {};
 var lastgoodvalue = {};
 
+var engine_centre_px = 150;
+
 function setup() {
-    canvas = createCanvas(400, 400);
+    canvas = createCanvas(600, 400);
     canvas.parent('canvas');
 
     engine = new Engine();
+
+    pvdiagram = new PVDiagram(5000);
 
     validate('bore', (x) => x > 0);
 }
@@ -52,8 +57,10 @@ function draw() {
     let stepTime = 0.0001;
     let steps = timeFactor * secs/stepTime;
     if (steps > 10000) steps = 10000;
-    for (let i = 0; i < steps; i++)
+    for (let i = 0; i < steps; i++) {
         engine.step(stepTime);
+        pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+    }
 
     background(220);
 
@@ -62,6 +69,9 @@ function draw() {
     drawPiston();
     drawPorts();
     drawPivot();
+
+    translate(engine_centre_px*2,0); // offset to clear the engine
+    pvdiagram.draw(canvas.width-engine_centre_px*2,canvas.height); // draw inside the reset of the canvas
 
     if (engine.rpm > maxrpm) maxrpm = engine.rpm;
     txt('rpm', round(engine.rpm, 2));
@@ -80,7 +90,7 @@ function drawFlywheel() {
 
     push();
 
-    translate(canvas.width/2, centre_px);
+    translate(engine_centre_px, centre_px);
 
     circle(0, 0, diameter); // flywheel
 
@@ -102,7 +112,7 @@ function drawCylinder() {
     let cylinder_height_px = cylinder_height_mm * px_per_mm + piston_height_px
     let cylinder_width_px = cylinder_width_mm * px_per_mm;
 
-    translate(canvas.width/2, pivot_centre_px);
+    translate(engine_centre_px, pivot_centre_px);
     rotate(engine.cylinderangle * PI/180);
 
     rect(-cylinder_width_px/2, -pivot_height_mm*px_per_mm, cylinder_width_px, cylinder_height_px); // main cylinder
@@ -125,7 +135,7 @@ function drawPiston() {
 
     push();
 
-    translate(canvas.width/2, centre_px);
+    translate(engine_centre_px, centre_px);
     rotate(engine.crankposition * PI/180);
 
     rect(-5, 0, 10, -engine.crankthrow * px_per_mm); // crank
@@ -148,7 +158,7 @@ function drawPorts() {
 
     push();
 
-    translate(canvas.width/2, centre_px);
+    translate(engine_centre_px, centre_px);
     circle(engine.inletportx*px_per_mm, -engine.inletporty*px_per_mm, engine.inletportdiameter*px_per_mm);
     circle(engine.exhaustportx*px_per_mm, -engine.exhaustporty*px_per_mm, engine.exhaustportdiameter*px_per_mm);
     circle(engine.cylinderportx*px_per_mm, -engine.cylinderporty*px_per_mm, engine.cylinderportdiameter*px_per_mm);
@@ -160,7 +170,7 @@ function drawPivot() {
     let diameter = flywheeldiameter * px_per_mm;
     let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
-    circle(canvas.width/2, pivot_centre_px, 2);
+    circle(engine_centre_px, pivot_centre_px, 2);
 }
 
 function btn(id, cb) {
@@ -198,4 +208,4 @@ function validate(id, cb) {
     validators[id].push(cb);
 }
 
-btn('reset', function() { engine.reset(); maxrpm = 0; });
+btn('reset', function() { engine.reset(); pvdiagram.clear(); maxrpm = 0; });

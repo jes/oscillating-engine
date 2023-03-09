@@ -30,6 +30,7 @@ function Engine() {
     this.pistonheight = 0; // mm from top of cylinder
     this.crankpinx = 0; // mm from crank centre
     this.crankpiny = 0; // mm from crank centre
+    this.cylindervolume = 0; // mm^3
 
     this.reset();
 }
@@ -51,8 +52,7 @@ Engine.prototype.reset = function() {
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
     let stroke = this.crankthrow*2;
-    let currentVolume = this.pistonheight * pistonArea; // mm^3
-    let currentAirMass = (this.cylinderpressure/this.atmosphericpressure) * (currentVolume*1e-9) * this.airdensity; // kg
+    let currentAirMass = (this.cylinderpressure/this.atmosphericpressure) * (this.cylindervolume*1e-9) * this.airdensity; // kg
 
     // compute the effective port locations
     let inletPortX = sin(this.inletportangle * Math.PI/180) * this.portthrow;
@@ -111,7 +111,7 @@ Engine.prototype.step = function(dt) {
         this.rpm += friction_deltarpm;
     }
 
-    //this.rpm -= this.rpm * 0.1*dt; // TODO: ???
+    this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
     this.sumrpm += this.rpm;
 
@@ -130,9 +130,8 @@ Engine.prototype.step = function(dt) {
     this.computeCylinderPosition();
 
     // calculate updated cylinder pressure
-    let newVolume = this.pistonheight * pistonArea; // mm^3
     let newAirMass = currentAirMass + inletAirMass - exhaustAirMass; // kg
-    let pressureRatio = newAirMass / (newVolume*1e-9 * this.airdensity);
+    let pressureRatio = newAirMass / (this.cylindervolume*1e-9 * this.airdensity);
     this.cylinderpressure = pressureRatio * this.atmosphericpressure;
 };
 
@@ -149,6 +148,10 @@ Engine.prototype.computeCylinderPosition = function() {
     // 3. find height of piston
     let dist = Math.sqrt(dx*dx + dy*dy);
     this.pistonheight = this.deadspace + this.crankthrow + dist - this.pivotseparation;
+
+    // 4. find cylinder volume
+    let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
+    this.cylindervolume = this.pistonheight * pistonArea; // mm^3
 };
 
 // return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
