@@ -20,8 +20,7 @@ function setup() {
     engine = new Engine();
 
     validate('bore', (x) => x > 0);
-
-    }
+}
 
 function draw() {
     engine.crankthrow = val('crankthrow');
