@@ -52,7 +52,7 @@ Engine.prototype.reset = function() {
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
     let stroke = this.crankthrow*2;
-    let currentAirMass = (this.cylinderpressure/this.atmosphericpressure) * (this.cylindervolume*1e-9) * this.airdensity; // kg
+    let currentAirMass = this.computeMass(this.cylinderpressure, this.cylindervolume); // kg
 
     // compute the effective port locations
     let inletPortX = sin(this.inletportangle * Math.PI/180) * this.portthrow;
@@ -77,16 +77,13 @@ Engine.prototype.step = function(dt) {
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
-    // TODO: problem is that when timestep is too high,
-    // we let in so much air that the cylinder pressure
-    // would exceed the inlet pressure! Because we just multiply
-    // rate of change of pressure by dt
-
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
     let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
+    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.cylinderpressure, this.cylindervolume);
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
     let exhaustAirMass = this.airFlow(this.cylinderpressure, this.atmosphericpressure, exhaustPortArea) * dt; // kg
+    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.cylinderpressure, this.cylindervolume);
 
     // calculate torque from piston
     pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
@@ -130,9 +127,7 @@ Engine.prototype.step = function(dt) {
     this.computeCylinderPosition();
 
     // calculate updated cylinder pressure
-    let newAirMass = currentAirMass + inletAirMass - exhaustAirMass; // kg
-    let pressureRatio = newAirMass / (this.cylindervolume*1e-9 * this.airdensity);
-    this.cylinderpressure = pressureRatio * this.atmosphericpressure;
+    this.cylinderpressure = this.computePressure(currentAirMass + inletAirMass - exhaustAirMass, this.cylindervolume);
 };
 
 Engine.prototype.computeCylinderPosition = function() {
@@ -154,6 +149,17 @@ Engine.prototype.computeCylinderPosition = function() {
     this.cylindervolume = this.pistonheight * pistonArea; // mm^3
 };
 
+// return the pressure (kPa) of a given mass (kg) of air in a given volume (mm^3)
+Engine.prototype.computePressure = function(mass, volume) {
+    let pressureRatio = mass / (volume*1e-9 * this.airdensity);
+    return pressureRatio * this.atmosphericpressure;
+};
+
+// return the mass (kg) of a given pressure (kPa) of air in a given volume (mm^3)
+Engine.prototype.computeMass = function(pressure, volume) {
+    return (pressure/this.atmosphericpressure) * (volume*1e-9) * this.airdensity;
+}
+
 // return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
 Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     // cap the pressure difference at a factor of 1.8
@@ -163,6 +169,26 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
 
     let pressuredifference = pressure1 - pressure2;
     return pressuredifference * area * this.airflowrate*1e-6;
+};
+
+// limit the given airFlow (kg) from pressure1 (kPa) to pressure2 (kPa) so that the resultant pressure in the destination volume (mm^3) does not overshoot the supply pressure (pressure1)
+// need to make sure that we *do* allow pressure to decrease when it is already
+// above the supply pressure (i.e. only clamp airFlow in the direction of making
+// things worse)
+Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) {
+    let newMass = this.computeMass(pressure2, volume) + airFlow;
+    let newPressure = this.computePressure(newMass, volume);
+    let pressureDifference = pressure1 - pressure2;
+
+    if (pressureDifference > 0) { // airFlow should be positive
+        if (airFlow < 0) return 0;
+        if (newPressure <= pressure1) return airFlow;
+        return this.computeMass(pressure1, volume) - this.computeMass(pressure2, volume);
+    } else { // airFlow should be negative
+        if (airFlow > 0) return 0;
+        if (newPressure >= pressure1) return airFlow;
+        return this.computeMass(pressure1, volume) - this.computeMass(pressure2, volume);
+    }
 };
 
 // https://math.stackexchange.com/a/290526
