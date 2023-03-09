@@ -47,6 +47,9 @@ function draw() {
     engine.airflowrate = val('airflowrate');
     engine.airdensity = val('airdensity');
 
+    pvdiagram.inletpressure = engine.inletpressure;
+    pvdiagram.atmosphericpressure = engine.atmosphericpressure;
+
     let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
