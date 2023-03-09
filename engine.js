@@ -15,8 +15,7 @@ function Engine() {
     this.flywheelmomentofinertia = 7.3e-8; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 20; // kPa
-    this.frictiontorque = 0.006; // Nm, opposing the flywheel rotation
-    this.airflowrate = 10; // kg/(m^2.kPa.sec) - TODO?
+    this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
 
@@ -162,13 +161,25 @@ Engine.prototype.computeMass = function(pressure, volume) {
 
 // return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
 Engine.prototype.airFlow = function(pressure1, pressure2, area) {
-    // cap the pressure difference at a factor of 1.8
-    // TODO: this should somehow relate to the speed of sound?
-    //if (pressure1 > 1.8*pressure2) pressure1 = 1.8*pressure2;
-    //if (pressure2 > 1.8*pressure1) pressure2 = 1.8*pressure1;
+    // is the air flowing the correct way?
+    if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
 
-    let pressuredifference = pressure1 - pressure2;
-    return pressuredifference * area * this.airflowrate*1e-6;
+    // 1. compute flow velocity
+    // https://physics.stackexchange.com/a/131068
+    // pressure2 + 1/2 rho v^2 = pressure1
+    // rho is density in pressure2
+    // v^2 = 2(pressure1 - pressure2) / rho
+    let rho = (pressure2/this.atmosphericpressure)*this.airdensity; // kg/m^3
+    let velsqr = 2 * 1000*(pressure1 - pressure2) / rho;
+    let vel = Math.sqrt(velsqr); // m/s
+
+    // 2. cap flow at speed of sound
+    if (vel > this.speedofsound) vel = this.speedofsound;
+
+    // 3. compute mass flow
+    let volumeFlow = vel * area * 1e-6; // m^3 / sec
+    let massFlow = volumeFlow * rho; // kg / sec
+    return massFlow;
 };
 
 // limit the given airFlow (kg) from pressure1 (kPa) to pressure2 (kPa) so that the resultant pressure in the destination volume (mm^3) does not overshoot the supply pressure (pressure1)

@@ -44,8 +44,8 @@ function draw() {
     engine.atmosphericpressure = val('atmosphericpressure');
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.frictiontorque = val('frictiontorque');
-    engine.airflowrate = val('airflowrate');
     engine.airdensity = val('airdensity');
+    engine.speedofsound = val('speedofsound');
 
     pvdiagram.inletpressure = engine.inletpressure;
     pvdiagram.atmosphericpressure = engine.atmosphericpressure;
