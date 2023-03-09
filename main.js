@@ -84,6 +84,7 @@ function draw() {
     txt('meanrpm', round(engine.meanrpm, 2));
     txt('power', round(engine.power, 3));
     txt('horsepower', round(engine.power/746, 5));
+    txt('cc', round(PI * (engine.bore/20)*(engine.bore/20) * (engine.crankthrow*2/10), 2));
 }
 
 function drawFlywheel() {
