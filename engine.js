@@ -88,7 +88,7 @@ Engine.prototype.step = function(dt) {
     exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.cylinderpressure, this.cylindervolume);
 
     // calculate torque from piston
-    pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
+    pistonForce = 1000 * (this.cylinderpressure-this.atmosphericpressure) * pistonArea*1e-6; // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
 
