@@ -14,9 +14,17 @@ TimingDiagram.prototype.index2angle = function(index) {
 };
 
 TimingDiagram.prototype.add = function(angle, inlet, exhaust) {
+    // XXX: do nothing if we crossed 0 (TODO: fill in the points either side of 0?)
+    if (Math.abs(angle-this.lastpos) > 180) {
+        this.lastpos = angle;
+        return;
+    }
+
     let i0 = this.angle2index(this.lastpos);
     let i1 = this.angle2index(angle);
-    if (i0 > i1) i0 = 0;
+
+    if (i0 > i1) [i0,i1] = [i1,i0];
+
     for (let i = i0; i <= i1; i++)
         this.points[i] = [inlet, exhaust];
     this.lastpos = angle;
