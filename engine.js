@@ -219,7 +219,7 @@ Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) 
 
 // https://math.stackexchange.com/a/290526
 function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
-  if (r0 > r1) r0,r1 = r1,r0; // without loss of generality, r0 is smaller
+  if (r0 > r1) [r0,r1] = [r1,r0]; // without loss of generality, r0 is smaller
   var rr0 = r0*r0;
   var rr1 = r1*r1;
   var c = Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
