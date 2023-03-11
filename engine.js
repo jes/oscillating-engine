@@ -223,11 +223,6 @@ function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
   var rr1 = r1*r1;
   var c = Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
   if (c >= r0+r1) return 0; // no overlap: return 0 area
-  if (c < r0 || c < r1) {
-      // full overlap: return area of smallest circle
-      if (r0 < r1) return Math.PI*r0*r0;
-      else return Math.PI*r1*r1;
-  }
   var phi = (Math.acos((rr0+(c*c)-rr1) / (2*r0*c)))*2;
   var theta = (Math.acos((rr1+(c*c)-rr0) / (2*r1*c)))*2;
   var area1 = 0.5*theta*rr1 - 0.5*rr1*Math.sin(theta);
