@@ -18,6 +18,7 @@ function Engine() {
     this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
+    this.airflowmethod = 'empirical'; // empirical/bernoulli/linear
 
     // state:
     this.cylinderpressure = 0; // kPa
@@ -164,22 +165,34 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     // is the air flowing the correct way?
     if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
 
-    // 1. compute flow velocity
-    // https://physics.stackexchange.com/a/131068
-    // pressure2 + 1/2 rho v^2 = pressure1
-    // rho is density in pressure2
-    // v^2 = 2(pressure1 - pressure2) / rho
-    let rho = (pressure2/this.atmosphericpressure)*this.airdensity; // kg/m^3
-    let velsqr = 2 * 1000*(pressure1 - pressure2) / rho;
-    let vel = Math.sqrt(velsqr); // m/s
+    if (this.airflowmethod == 'empirical') {
+        // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
+        let pressureDifference = pressure1 - pressure2;
+        let kg_per_sec_mm2_kpa = 0.000035/Math.pow(pressureDifference,0.73)+0.00000154;
+        let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
+        return massFlow;
+    } else if (this.airflowmethod == 'bernoulli') {
+        // 1. compute flow velocity
+        // https://physics.stackexchange.com/a/131068
+        // pressure2 + 1/2 rho v^2 = pressure1
+        // rho is density in pressure2
+        // v^2 = 2(pressure1 - pressure2) / rho
+        let rho = (pressure2/this.atmosphericpressure)*this.airdensity; // kg/m^3
+        let velsqr = 2 * 1000*(pressure1 - pressure2) / rho;
+        let vel = Math.sqrt(velsqr); // m/s
 
-    // 2. cap flow at speed of sound
-    if (vel > this.speedofsound) vel = this.speedofsound;
+        // 2. cap flow at speed of sound
+        if (vel > this.speedofsound) vel = this.speedofsound;
 
-    // 3. compute mass flow
-    let volumeFlow = vel * area * 1e-6; // m^3 / sec
-    let massFlow = volumeFlow * rho; // kg / sec
-    return massFlow;
+        // 3. compute mass flow
+        let volumeFlow = vel * area * 1e-6; // m^3 / sec
+        let massFlow = volumeFlow * rho; // kg / sec
+        return massFlow;
+    } else { // this.airflowmethod == 'linear'
+        let airFlowRate = 10; // kg/(m^2.kPa.sec)
+        let pressureDifference = pressure1 - pressure2;
+        return area * pressureDifference * airFlowRate * 1e-6;
+    }
 };
 
 // limit the given airFlow (kg) from pressure1 (kPa) to pressure2 (kPa) so that the resultant pressure in the destination volume (mm^3) does not overshoot the supply pressure (pressure1)

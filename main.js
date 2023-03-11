@@ -44,8 +44,7 @@ function draw() {
     engine.atmosphericpressure = val('atmosphericpressure');
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.frictiontorque = val('frictiontorque');
-    engine.airdensity = val('airdensity');
-    engine.speedofsound = val('speedofsound');
+    engine.airflowmethod = txtval('airflowmethod');
 
     pvdiagram.inletpressure = engine.inletpressure;
     pvdiagram.atmosphericpressure = engine.atmosphericpressure;
@@ -179,6 +178,10 @@ function drawPivot() {
 
 function btn(id, cb) {
     document.getElementById(id).onclick = cb;
+}
+
+function txtval(id) {
+    return document.getElementById(id).value;
 }
 
 function val(id) {

@@ -44,10 +44,13 @@
 
     <h2>Simulation parameters</h2>
     <label for="atmosphericpressure">Atmospheric pressure: </label> <input type="text" id="atmosphericpressure" value="101.325"> kPa<br>
-    <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="20"> kPa above atmosphere<br>
+    <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="25"> kPa above atmosphere<br>
     <label for="frictiontorque">Friction torque: </label> <input type="text" id="frictiontorque" value="0.01"> Nm<br>
-    <label for="airdensity">Air density: </label> <input type="text" id="airdensity" value="1.204"> kg m<sup>-3</sup> at atmospheric pressure<br>
-    <label for="speedofsound">Speed of sound: </label> <input type="text" id="speedofsound" value="343"> m s<sup>-1</sup><br>
+    <label for="airflowmethod">Air flow method: </label> <select id="airflowmethod">
+        <option value="empirical">Empirical</option>
+        <option value="bernoulli">Bernoulli's equation</option>
+        <option value="linear">Linear</option>
+    </select>
 </div>
 
 <script src="p5.min.js"></script>
