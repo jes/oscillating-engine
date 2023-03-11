@@ -1,6 +1,7 @@
 var canvas;
 var engine;
 var pvdiagram;
+var timingdiagram;
 
 var flywheeldiameter = 68; // mm
 
@@ -23,6 +24,7 @@ function setup() {
     engine = new Engine();
 
     pvdiagram = new PVDiagram(5000);
+    timingdiagram = new TimingDiagram(1000);
 
     validate('bore', (x) => x > 0);
 }
@@ -62,16 +64,27 @@ function draw() {
     for (let i = 0; i < steps; i++) {
         engine.step(stepTime);
         pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+        timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
     }
 
     background(220);
 
+    // draw the engine schematic
     drawFlywheel();
+
+    push();
+    let diameter = flywheeldiameter * px_per_mm;
+    let centre_px = canvas.height - canvasmargin - diameter/2;
+    translate(engine_centre_px, centre_px);
+    timingdiagram.draw(diameter-1);
+    pop();
+
     drawCylinder();
     drawPiston();
     drawPorts();
     drawPivot();
 
+    // draw the pressure-volume diagram
     translate(engine_centre_px*2,0); // offset to clear the engine
     pvdiagram.draw(canvas.width-engine_centre_px*2,canvas.height); // draw inside the reset of the canvas
 
@@ -88,14 +101,15 @@ function draw() {
 
 function drawFlywheel() {
     let diameter = flywheeldiameter * px_per_mm;
-
     let centre_px = canvas.height - canvasmargin - diameter/2;
 
     push();
 
     translate(engine_centre_px, centre_px);
+    rotate((180+engine.crankposition) * PI/180);
 
     circle(0, 0, diameter); // flywheel
+    line(0, 0, 0, diameter/2);
 
     pop();
 }
@@ -215,4 +229,4 @@ function validate(id, cb) {
     validators[id].push(cb);
 }
 
-btn('reset', function() { engine.reset(); pvdiagram.clear(); maxrpm = 0; });
+btn('reset', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); maxrpm = 0; });

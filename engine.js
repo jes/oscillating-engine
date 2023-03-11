@@ -75,7 +75,9 @@ Engine.prototype.step = function(dt) {
     // area; want the are of intersection of the inlet port,
     // cylinder port, and area of cylinder above piston
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
+    this.inletportarea = inletPortArea;
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
+    this.exhaustportarea = exhaustPortArea;
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
     let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
