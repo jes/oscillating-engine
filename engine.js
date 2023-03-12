@@ -37,9 +37,9 @@ function Engine() {
 }
 
 Engine.prototype.reset = function() {
-    this.cylinderpressure = this.atmosphericpressure;
+    this.cylinderpressure = this.inletpressure;
     this.crankposition = 0;
-    this.rpm = 100;
+    this.rpm = 200;
     this.computeCylinderPosition();
 
     this.sumtorque = 0;
@@ -51,8 +51,8 @@ Engine.prototype.reset = function() {
 };
 
 Engine.prototype.step = function(dt) {
-    let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
-    let stroke = this.crankthrow*2;
+    let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
+    let stroke = this.crankthrow*2; // mm
     let currentAirMass = this.computeMass(this.cylinderpressure, this.cylindervolume); // kg
 
     // compute the effective port locations
@@ -75,18 +75,18 @@ Engine.prototype.step = function(dt) {
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
     // if port is not fully exposed, reduce areas accordingly
-    inletPortArea = this.reducedPortArea(inletPortArea, this.inletportdiameter, this.cylinderportdiameter);
-    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.exhaustportdiameter, this.cylinderportdiameter);
+    inletPortArea = this.reducedPortArea(inletPortArea, this.inletportdiameter, this.cylinderportdiameter); // mm^2
+    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.exhaustportdiameter, this.cylinderportdiameter); // mm^2
     this.inletportarea = inletPortArea;
     this.exhaustportarea = exhaustPortArea;
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
     let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
-    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.cylinderpressure, this.cylindervolume);
+    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.cylinderpressure, this.cylindervolume); // kg
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
     let exhaustAirMass = this.airFlow(this.cylinderpressure, this.atmosphericpressure, exhaustPortArea) * dt; // kg
-    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.cylinderpressure, this.cylindervolume);
+    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.cylinderpressure, this.cylindervolume); // kg
 
     // calculate torque from piston
     pistonForce = 1000 * (this.cylinderpressure-this.atmosphericpressure) * pistonArea*1e-6; // Newtons
@@ -98,11 +98,11 @@ Engine.prototype.step = function(dt) {
 
     // calculate flywheel angular velocity with piston torque
     let angularacceleration = crankTorque / this.flywheelmomentofinertia; // rad/s^2
-    this.rpm += (angularacceleration / (120*Math.PI)) * dt;
+    this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
     let friction_angaccel = this.frictiontorque / this.flywheelmomentofinertia; // rad/s^2
-    let friction_deltarpm = Math.abs((friction_angaccel / (120*Math.PI)) * dt);
+    let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
         this.rpm = 0;
     } else if (this.rpm > 0) {
