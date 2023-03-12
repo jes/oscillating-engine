@@ -5,7 +5,7 @@ function Engine() {
     this.portthrow = 12; // mm
     this.deadspace = 4.75; // mm, between top of piston and top of cylinder
     this.bore = 15; // mm
-    this.rodlength = 63; // mm (no effect on simulation)
+    this.rodlength = 63; // mm
     this.inletportdiameter = 2.5; // mm
     this.exhaustportdiameter = 2.5; // mm
     this.cylinderportdiameter = 2.0; // mm
@@ -71,13 +71,13 @@ Engine.prototype.step = function(dt) {
     this.cylinderporty = cylinderPortY;
 
     // compute port overlap areas
-    // TODO: if the ports don't lie within the cylinder, or are
-    // the wrong side of the piston surface, then we get less
-    // area; want the are of intersection of the inlet port,
-    // cylinder port, and area of cylinder above piston
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
-    this.inletportarea = inletPortArea;
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
+
+    // if port is not fully exposed, reduce areas accordingly
+    inletPortArea = this.reducedPortArea(inletPortArea, this.inletportdiameter, this.cylinderportdiameter);
+    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.exhaustportdiameter, this.cylinderportdiameter);
+    this.inletportarea = inletPortArea;
     this.exhaustportarea = exhaustPortArea;
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
@@ -143,7 +143,7 @@ Engine.prototype.computeCylinderPosition = function() {
     let dy = this.pivotseparation - this.crankpiny;
     this.cylinderangle = Math.atan2(dy, dx) * 180/PI - 90;
 
-    // 3. find height of piston
+    // 3. find height of piston from top of cylinder
     let dist = Math.sqrt(dx*dx + dy*dy);
     this.pistonheight = this.deadspace + this.crankthrow + dist - this.pivotseparation;
 
@@ -215,6 +215,27 @@ Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) 
         if (airFlow > 0) return 0;
         if (newPressure >= pressure1) return airFlow;
         return this.computeMass(pressure1, volume) - this.computeMass(pressure2, volume);
+    }
+};
+
+Engine.prototype.reducedPortArea = function(area, d1, d2) {
+    let totalheight = this.crankthrow + this.rodlength + this.deadspace;
+    let portheight = totalheight - (this.pivotseparation + this.portthrow); // mm - height of port centres from top of cylinder
+
+    // say that the effective diameter is the smaller of the two
+    let d = (d1 < d2) ? d1 : d2;
+
+    if (this.pistonheight < portheight-d/2) {
+        // port is completely covered up
+        return 0;
+    } else if (this.pistonheight < portheight+d/2) {
+        // port is partially covered up
+        // TODO: this assumes area changes linearly with height, this is not correct
+        let start = portheight-d/2;
+        return area * (this.pistonheight-start)/d;
+    } else {
+        // port is completely exposed
+        return area;
     }
 };
 
