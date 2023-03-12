@@ -5,13 +5,14 @@ function Engine() {
     this.portthrow = 12; // mm
     this.deadspace = 4.75; // mm, between top of piston and top of cylinder
     this.bore = 15; // mm
-    this.rodlength = 63; // mm
+    this.rodlength = 63; // mm (no effect on simulation)
     this.inletportdiameter = 2.5; // mm
     this.exhaustportdiameter = 2.5; // mm
     this.cylinderportdiameter = 2.0; // mm
     this.inletportangle = -14.5; // degrees
     this.exhaustportangle = 14.5; // degrees
     this.pivotseparation = 67.5; // mm
+    this.flywheeldiameter = 68; // mm (no effect on simulation)
     this.flywheelmomentofinertia = 7.3e-8; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 30; // kPa

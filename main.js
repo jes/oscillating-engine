@@ -3,8 +3,6 @@ var engine;
 var pvdiagram;
 var timingdiagram;
 
-var flywheeldiameter = 68; // mm
-
 var piston_height_px = 10;
 
 var canvasmargin = 20; // px
@@ -14,7 +12,7 @@ var maxrpm = 0;
 
 var engine_centre_px = 150;
 
-var floatfields = ['crankthrow', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque'];
+var floatfields = ['crankthrow', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque'];
 var anychanged = false;
 
 var presets = {
@@ -30,7 +28,24 @@ var presets = {
         inletportangle: -14.5,
         exhaustportangle: 14.5,
         pivotseparation: 67.5,
+        flywheeldiameter: 68,
         flywheelmomentofinertia: 7.3e-8,
+    },
+
+    stevesworkshop: {
+        crankthrow: 8,
+        portthrow: 10,
+        deadspace: 1,
+        bore: 12,
+        rodlength: 40,
+        inletportdiameter: 2,
+        exhaustportdiameter: 2,
+        cylinderportdiameter: 2,
+        inletportangle: -14.5,
+        exhaustportangle: 14.5,
+        pivotseparation: 35,
+        flywheeldiameter: 50,
+        flywheelmomentofinertia: 2.3e-5, // ??? is this right?
     },
 };
 
@@ -74,7 +89,7 @@ function draw() {
     drawFlywheel();
 
     push();
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2;
     translate(engine_centre_px, centre_px);
     timingdiagram.draw(diameter-1);
@@ -101,7 +116,7 @@ function draw() {
 }
 
 function drawFlywheel() {
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2;
 
     push();
@@ -121,7 +136,7 @@ function drawCylinder() {
     // height of pivot from top of cylinder
     let pivot_height_mm = engine.deadspace + engine.crankthrow + engine.rodlength - engine.pivotseparation;
 
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
     // cylinder dimensions
@@ -148,7 +163,7 @@ function drawCylinder() {
 }
 
 function drawPiston() {
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2;
 
     push();
@@ -171,7 +186,7 @@ function drawPiston() {
 }
 
 function drawPorts() {
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
     push();
@@ -185,7 +200,7 @@ function drawPorts() {
 }
 
 function drawPivot() {
-    let diameter = flywheeldiameter * px_per_mm;
+    let diameter = engine.flywheeldiameter * px_per_mm;
     let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
     circle(engine_centre_px, pivot_centre_px, 2);
@@ -230,7 +245,7 @@ function update() {
     pvdiagram.inletpressure = engine.inletpressure;
     pvdiagram.atmosphericpressure = engine.atmosphericpressure;
 
-    let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
+    let totalheight_mm = engine.flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
 }
