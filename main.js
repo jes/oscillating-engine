@@ -28,6 +28,7 @@ var presets = {
         pivotseparation: 67.5,
         flywheeldiameter: 68,
         flywheelmomentofinertia: "0.000203",
+        url: "https://wigwagengine.wixsite.com/wigwag",
     },
 
     stevesworkshop: {
@@ -44,6 +45,24 @@ var presets = {
         pivotseparation: 35,
         flywheeldiameter: 50,
         flywheelmomentofinertia: "0.0000723",
+        url: "http://www.steves-workshop.co.uk/steammodels/simpleoscil/simpleoscil.htm",
+    },
+
+    wobler: {
+        crankthrow: 10,
+        portthrow: 10,
+        deadspace: 3,
+        bore: 10,
+        rodlength: 45,
+        inletportdiameter: 2.2,
+        exhaustportdiameter: 2.2,
+        cylinderportdiameter: 1.7,
+        inletportangle: -12.7,
+        exhaustportangle: 12.7,
+        pivotseparation: 45,
+        flywheeldiameter: 36,
+        flywheelmomentofinertia: "0.0000139",
+        url: "https://modelengineeringwebsite.com/Wobler_oscillator.html",
     },
 };
 
@@ -247,8 +266,10 @@ function update() {
 }
 
 function loadPreset(p) {
-    for (field in presets[p])
-        document.getElementById(field).value = presets[p][field];
+    for (field in presets[p]) {
+        let el = document.getElementById(field);
+        if (el) el.value = presets[p][field];
+    }
     update();
 }
 
