@@ -8,8 +8,6 @@ var piston_height_px = 10;
 var canvasmargin = 20; // px
 var px_per_mm;
 
-var maxrpm = 0;
-
 var engine_centre_px = 150;
 
 var floatfields = ['crankthrow', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque'];
@@ -104,9 +102,7 @@ function draw() {
     translate(engine_centre_px*2,0); // offset to clear the engine
     pvdiagram.draw(canvas.width-engine_centre_px*2,canvas.height); // draw inside the reset of the canvas
 
-    if (engine.rpm > maxrpm) maxrpm = engine.rpm;
     txt('rpm', round(engine.rpm, 2));
-    txt('maxrpm', round(maxrpm, 2));
     txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
     txt('torque', round(engine.torque, 5));
     txt('meanrpm', round(engine.meanrpm, 2));
@@ -256,7 +252,7 @@ function loadPreset(p) {
     update();
 }
 
-btn('reset', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); maxrpm = 0; });
+btn('reset', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 btn('loadpreset', function() {
     loadPreset(txtval('preset'));
 });
