@@ -15,7 +15,7 @@ function Engine() {
     this.flywheeldiameter = 68; // mm (no effect on simulation)
     this.flywheelmomentofinertia = 0.000203; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
-    this.inletpressure = this.atmosphericpressure + 30; // kPa
+    this.inletpressure = this.atmosphericpressure + 50; // kPa
     this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
