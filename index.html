@@ -3,7 +3,15 @@
 <head>
     <title>Oscillating engine simulator</title>
 <style type="text/css">
-.error { background:#f88 }
+.changed { background:#fdd }
+input {
+    width: 100px;
+}
+label {
+    display: inline-block;
+    width: 250px;
+    text-align: right;
+}
 </style>
 </head>
 <body>
@@ -14,8 +22,8 @@
 <div id="canvas"></div>
 
 <div id="status">
-    <label for="timefactor"><span id="timefactorlabel">1.00</span>x</label>
-    <input type="range" min="1" max="100" value="10" id="timefactor"><br>
+    <input type="range" min="1" max="100" value="10" id="timefactor">
+    <span id="timefactorlabel">1.00</span>x<br>
     <button id="reset">Kick</button><br>
     <span id="rpm">0</span> rpm (<span id="maxrpm">0</span> max.)
     <br>
@@ -28,29 +36,37 @@
 </div>
 
 <div id="params" style="float:left">
-    <h2>Engine parameters</h2>
-    <label for="crankthrow">Crank throw:</label> <input type="text" id="crankthrow" value="15"> mm<br>
-    <label for="portthrow">Port throw:</label> <input type="text" id="portthrow" value="12"> mm<br>
-    <label for="deadspace">Dead space:</label> <input type="text" id="deadspace" value="4.75"> mm<br>
-    <label for="bore">Bore: </label> <input type="text" id="bore" value="15"> mm<br>
-    <label for="rodlength">Rod length: </label> <input type="text" id="rodlength" value="63"> mm<br>
-    <label for="inletportdiameter">Inlet port diameter: </label> <input type="text" id="inletportdiameter" value="2.5"> mm<br>
-    <label for="exhaustportdiameter">Exhaust port diameter: </label> <input type="text" id="exhaustportdiameter" value="2.5"> mm<br>
-    <label for="cylinderportdiameter">Cylinder port diameter: </label> <input type="text" id="cylinderportdiameter" value="2.0"> mm<br>
-    <label for="inletportangle">Inlet port angle: </label> <input type="text" id="inletportangle" value="-14.5"> &deg;<br>
-    <label for="exhaustportangle">Exhaust port angle: </label> <input type="text" id="exhaustportangle" value="14.5"> &deg;<br>
-    <label for="pivotseparation">Pivot separation: </label> <input type="text" id="pivotseparation" value="67.5"> mm<br>
-    <label for="flywheelmomentofinertia">Flywheel moment of inertia: </label> <input type="text" id="flywheelmomentofinertia" value="0.000000073"> kg m<sup>-2</sup><br>
+    <label for="preset">Preset:</label> <select id="preset">
+        <option value="wigwag">Wig-Wag</option>
+    </select> <button id="loadpreset">Load</button><br>
+    <br>
 
-    <h2>Simulation parameters</h2>
+    <label for="crankthrow">Crank throw:</label> <input type="text" id="crankthrow"> mm<br>
+    <label for="portthrow">Port throw:</label> <input type="text" id="portthrow"> mm<br>
+    <label for="deadspace">Dead space:</label> <input type="text" id="deadspace"> mm<br>
+    <label for="bore">Bore: </label> <input type="text" id="bore"> mm<br>
+    <label for="rodlength">Rod length: </label> <input type="text" id="rodlength"> mm<br>
+    <label for="inletportdiameter">Inlet port diameter: </label> <input type="text" id="inletportdiameter"> mm<br>
+    <label for="exhaustportdiameter">Exhaust port diameter: </label> <input type="text" id="exhaustportdiameter"> mm<br>
+    <label for="cylinderportdiameter">Cylinder port diameter: </label> <input type="text" id="cylinderportdiameter"> mm<br>
+    <label for="inletportangle">Inlet port angle: </label> <input type="text" id="inletportangle"> &deg;<br>
+    <label for="exhaustportangle">Exhaust port angle: </label> <input type="text" id="exhaustportangle"> &deg;<br>
+    <label for="pivotseparation">Pivot separation: </label> <input type="text" id="pivotseparation"> mm<br>
+    <label for="flywheelmomentofinertia">Flywheel moment of inertia: </label> <input type="text" id="flywheelmomentofinertia"> kg m<sup>-2</sup><br>
+
+    <br>
+
     <label for="atmosphericpressure">Atmospheric pressure: </label> <input type="text" id="atmosphericpressure" value="101.325"> kPa<br>
-    <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="30"> kPa above atmosphere<br>
+    <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="30"> kPa above atmospheric<br>
     <label for="frictiontorque">Friction torque: </label> <input type="text" id="frictiontorque" value="0.01"> Nm<br>
     <label for="airflowmethod">Air flow method: </label> <select id="airflowmethod">
         <option value="empirical">Empirical</option>
         <option value="bernoulli">Bernoulli's equation</option>
         <option value="linear">Linear</option>
-    </select>
+    </select><br>
+
+    <br>
+    <label for="update"></label><button id="update">Apply</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
 </div>
 
 <script src="p5.min.js"></script>

@@ -12,10 +12,27 @@ var px_per_mm;
 
 var maxrpm = 0;
 
-var validators = {};
-var lastgoodvalue = {};
-
 var engine_centre_px = 150;
+
+var floatfields = ['crankthrow', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque'];
+var anychanged = false;
+
+var presets = {
+    wigwag: {
+        crankthrow: 15,
+        portthrow: 12,
+        deadspace: 4.75,
+        bore: 15,
+        rodlength: 63,
+        inletportdiameter: 2.5,
+        exhaustportdiameter: 2.5,
+        cylinderportdiameter: 2.0,
+        inletportangle: -14.5,
+        exhaustportangle: 14.5,
+        pivotseparation: 67.5,
+        flywheelmomentofinertia: 7.3e-8,
+    },
+};
 
 function setup() {
     canvas = createCanvas(600, 400);
@@ -26,34 +43,18 @@ function setup() {
     pvdiagram = new PVDiagram(5000);
     timingdiagram = new TimingDiagram(1000);
 
-    validate('bore', (x) => x > 0);
+    loadPreset(txtval('preset'));
 }
 
 function draw() {
-    engine.crankthrow = val('crankthrow');
-    engine.portthrow = val('portthrow');
-    engine.deadspace = val('deadspace');
-    engine.bore = val('bore');
-    engine.rodlength = val('rodlength');
-    engine.inletportdiameter = val('inletportdiameter');
-    engine.exhaustportdiameter = val('exhaustportdiameter');
-    engine.cylinderportdiameter = val('cylinderportdiameter');
-    engine.inletportangle = val('inletportangle');
-    engine.exhaustportangle = val('exhaustportangle');
-    engine.pivotseparation = val('pivotseparation');
-    engine.flywheelmomentofinertia = val('flywheelmomentofinertia');
+    anychanged = false;
+    for (let i = 0; i < floatfields.length; i++) {
+        check(floatfields[i], engine[floatfields[i]] == val(floatfields[i]));
+    }
+    check('inletpressure', engine.inletpressure == val('inletpressure')+engine.atmosphericpressure);
+    check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
 
-    engine.atmosphericpressure = val('atmosphericpressure');
-    engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
-    engine.frictiontorque = val('frictiontorque');
-    engine.airflowmethod = txtval('airflowmethod');
-
-    pvdiagram.inletpressure = engine.inletpressure;
-    pvdiagram.atmosphericpressure = engine.atmosphericpressure;
-
-    let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
-    let availableheight_px = canvas.height - 2*canvasmargin;
-    px_per_mm = availableheight_px / totalheight_mm;
+    document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
 
     let secs = deltaTime / 1000.0;
     let timeFactor = val('timefactor')/100;
@@ -199,21 +200,7 @@ function txtval(id) {
 }
 
 function val(id) {
-    let formvalue = parseFloat(document.getElementById(id).value);
-    let vals = validators[id];
-    if (vals) {
-        for (let i = 0; i < vals.length; i++) {
-            let cb = vals[i];
-            if (!cb(formvalue)) {
-                // validation failed
-                document.getElementById(id).classList.add('error');
-                return lastgoodvalue[id];
-            }
-        }
-    }
-    document.getElementById(id).classList.remove('error');
-    lastgoodvalue[id] = formvalue;
-    return formvalue;
+    return parseFloat(document.getElementById(id).value);
 }
 
 function txt(id, val) {
@@ -224,9 +211,38 @@ function round(num, places) {
     return Math.round(num * Math.pow(10,places))/Math.pow(10,places);
 }
 
-function validate(id, cb) {
-    validators[id] ||= [];
-    validators[id].push(cb);
+function check(id, ok) {
+    if (!ok) {
+        anychanged = true;
+        document.getElementById(id).classList.add('changed');
+    } else {
+        document.getElementById(id).classList.remove('changed');
+    }
+}
+
+function update() {
+    for (let i = 0; i < floatfields.length; i++) {
+        engine[floatfields[i]] = val(floatfields[i]);
+    }
+    engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
+    engine.airflowmethod = txtval('airflowmethod');
+
+    pvdiagram.inletpressure = engine.inletpressure;
+    pvdiagram.atmosphericpressure = engine.atmosphericpressure;
+
+    let totalheight_mm = flywheeldiameter/2 + engine.crankthrow + engine.rodlength + engine.deadspace; // mm
+    let availableheight_px = canvas.height - 2*canvasmargin;
+    px_per_mm = availableheight_px / totalheight_mm;
+}
+
+function loadPreset(p) {
+    for (field in presets[p])
+        document.getElementById(field).value = presets[p][field];
+    update();
 }
 
 btn('reset', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); maxrpm = 0; });
+btn('loadpreset', function() {
+    loadPreset(txtval('preset'));
+});
+btn('update', update);

@@ -14,7 +14,7 @@ function Engine() {
     this.pivotseparation = 67.5; // mm
     this.flywheelmomentofinertia = 7.3e-8; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
-    this.inletpressure = this.atmosphericpressure + 20; // kPa
+    this.inletpressure = this.atmosphericpressure + 30; // kPa
     this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
