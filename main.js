@@ -29,7 +29,7 @@ var presets = {
         exhaustportangle: 14.5,
         pivotseparation: 67.5,
         flywheeldiameter: 68,
-        flywheelmomentofinertia: 7.3e-8,
+        flywheelmomentofinertia: "0.000203",
     },
 
     stevesworkshop: {
@@ -45,7 +45,7 @@ var presets = {
         exhaustportangle: 14.5,
         pivotseparation: 35,
         flywheeldiameter: 50,
-        flywheelmomentofinertia: 2.3e-5, // ??? is this right?
+        flywheelmomentofinertia: "0.0000723",
     },
 };
 

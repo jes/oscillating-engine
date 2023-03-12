@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<title>Flywheel moment of inertia calculator</title>
+<style type="text/css">
+input {
+    width: 80px;
+}
+label {
+    display: inline-block;
+    width: 240px;
+    text-align: right;
+}
+.computed {
+    background: #ddd;
+    font-family: monospace;
+}
+.big {
+    font-size: 2.0em;
+}
+</style>
+</head>
+<body>
+    <h1>Flywheel moment of inertia calculator</h1>
+    <div style="float:left;">
+        <img style="float:left" src="flywheel1.png">
+    </div>
+    <div style="float:left;max-width:560px">
+        <p>We model a flywheel as 3 separate rings. Enter 0 for the thickness
+        of any ring that is not present on your flywheel. In practice the outer ring is usually
+        the only important one.</p>
+        <p>If your flywheel is spoked or has holes in it, you can approximate these as a solid disc with reduced thickness.</p>
+        <br>
+
+        <label for="material">Material:</label> <select id="material">
+            <option value="8530">Brass</option>
+            <option value="7850">Steel</option>
+            <option value="7300">Cast iron</option>
+            <option value="2700">Aluminium</option>
+            <option value="custom">Custom:</option>
+        </select>
+        <input id="density" type="text"> kg m<sup>-3</sup>
+        <br>
+        <br>
+
+        <label for="d1">d1:</label> <input id="d1" type="text"> mm<br>
+        <label for="h1">h1:</label> <input id="h1" type="text"> mm<br>
+        <label>Inner mass:</label> <span id="mass1" class="computed">--</span> kg<br>
+        <label>Inner moment of inertia:</label> <span id="moi1" class="computed">--</span> kg m<sup>2</sup><br>
+        <br>
+
+        <label for="d2">d2:</label> <input id="d2" type="text"> mm<br>
+        <label for="h2">h2:</label> <input id="h2" type="text"> mm<br>
+        <label>Middle mass:</label> <span id="mass2" class="computed">--</span> kg<br>
+        <label>Middle moment of inertia:</label> <span id="moi2" class="computed">--</span> kg m<sup>2</sup><br>
+
+        <br>
+        <label for="d3">d3:</label> <input id="d3" type="text"> mm<br>
+        <label for="h3">h3:</label> <input id="h3" type="text"> mm<br>
+        <label>Outer mass:</label> <span id="mass3" class="computed">--</span> kg<br>
+        <label>Outer moment of inertia:</label> <span id="moi3" class="computed">--</span> kg m<sup>2</sup><br>
+
+        <br>
+
+        <label>Flywheel mass:</label> <span id="mass" class="computed big">--</span> kg<br>
+        <label>Flywheel moment of inertia:</label> <span id="moi" class="computed big">--</span> kg m<sup>2</sup><br>
+        <br>
+
+        <img src="flywheel2.png">
+    </div>
+
+    <div style="clear:both"></div>
+
+    <hr>
+
+    <i>By <a href="https://incoherency.co.uk/">James Stanley</a>.</i>
+
+    <script type="text/javascript" src="flywheel.js"></script>
+</body>
+</html>

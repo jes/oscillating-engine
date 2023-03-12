@@ -13,7 +13,7 @@ function Engine() {
     this.exhaustportangle = 14.5; // degrees
     this.pivotseparation = 67.5; // mm
     this.flywheeldiameter = 68; // mm (no effect on simulation)
-    this.flywheelmomentofinertia = 7.3e-8; // kg m^2
+    this.flywheelmomentofinertia = 0.000203; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 30; // kPa
     this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
