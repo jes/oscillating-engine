@@ -24,7 +24,7 @@ label {
 <div id="status">
     <input type="range" min="1" max="100" value="10" id="timefactor">
     <span id="timefactorlabel">1.00</span>x<br>
-    <button id="reset">Kick</button><br>
+    <button id="kick">Kick</button><br>
     <span id="rpm">0</span> rpm
     <br>
     <span id="pressure">0</span> kPa
@@ -45,7 +45,7 @@ label {
 
     <label for="bore">Bore: </label> <input type="text" id="bore"> mm<br>
     <label for="stroke">Stroke:</label> <input type="text" id="stroke"> mm<br>
-    <label for="deadspace">Dead space:</label> <input type="text" id="deadspace"> mm<br>
+    <label for="deadspace">Gap above piston at TDC:</label> <input type="text" id="deadspace"> mm<br>
     <label for="rodlength">Piston+rod length: </label> <input type="text" id="rodlength"> mm <small>crank pin axis to top of piston</small><br>
     <label for="pivotseparation">Pivot separation: </label> <input type="text" id="pivotseparation"> mm<br>
     <label for="portthrow">Port swing radius:</label> <input type="text" id="portthrow"> mm<br>
@@ -69,7 +69,7 @@ label {
     </select><br>
 
     <br>
-    <label for="update"></label><button id="update">Apply</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
+    <label for="update"></label><button id="update">Apply</button> <button id="reset">Reset</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
 </div>
 
 <div style="clear:both"></div>

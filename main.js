@@ -13,6 +13,13 @@ var engine_centre_px = 150;
 var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque'];
 var anychanged = false;
 
+var defaults = {
+    atmosphericpressure: "101.325",
+    inletpressure: "50",
+    frictiontorque: "0.01",
+    airflowmethod: "empirical",
+};
+
 var presets = {
     wigwag: {
         stroke: 30,
@@ -76,6 +83,7 @@ function setup() {
     timingdiagram = new TimingDiagram(1000);
 
     loadPreset(txtval('preset'));
+    update();
 }
 
 function draw() {
@@ -270,11 +278,20 @@ function loadPreset(p) {
         let el = document.getElementById(field);
         if (el) el.value = presets[p][field];
     }
-    update();
 }
 
-btn('reset', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
+btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 btn('loadpreset', function() {
     loadPreset(txtval('preset'));
 });
+document.getElementById('preset').onchange = function() {
+    loadPreset(txtval('preset'));
+};
 btn('update', update);
+btn('reset', function() {
+    loadPreset(txtval('preset'));
+    for (field in defaults) {
+        document.getElementById(field).value = defaults[field];
+    }
+    update();
+});
