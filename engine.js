@@ -1,7 +1,7 @@
 
 function Engine() {
     // parameters:
-    this.crankthrow = 15; // mm
+    this.stroke = 30; // mm
     this.portthrow = 12; // mm
     this.deadspace = 4.75; // mm, between top of piston and top of cylinder
     this.bore = 15; // mm
@@ -52,7 +52,6 @@ Engine.prototype.reset = function() {
 
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
-    let stroke = this.crankthrow*2; // mm
     let currentAirMass = this.computeMass(this.cylinderpressure, this.cylindervolume); // kg
 
     // compute the effective port locations
@@ -135,8 +134,8 @@ Engine.prototype.step = function(dt) {
 
 Engine.prototype.computeCylinderPosition = function() {
     // 1. find position of crank pin relative to crank centre
-    this.crankpinx = Math.sin(this.crankposition * PI/180) * this.crankthrow;
-    this.crankpiny = Math.cos(this.crankposition * PI/180) * this.crankthrow;
+    this.crankpinx = Math.sin(this.crankposition * PI/180) * this.stroke/2;
+    this.crankpiny = Math.cos(this.crankposition * PI/180) * this.stroke/2;
 
     // 2. find angle from crank pin to cylinder pivot
     let dx = this.crankpinx;
@@ -145,7 +144,7 @@ Engine.prototype.computeCylinderPosition = function() {
 
     // 3. find height of piston from top of cylinder
     let dist = Math.sqrt(dx*dx + dy*dy);
-    this.pistonheight = this.deadspace + this.crankthrow + dist - this.pivotseparation;
+    this.pistonheight = this.deadspace + this.stroke/2 + dist - this.pivotseparation;
 
     // 4. find cylinder volume
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
@@ -219,7 +218,7 @@ Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) 
 };
 
 Engine.prototype.reducedPortArea = function(area, d1, d2) {
-    let totalheight = this.crankthrow + this.rodlength + this.deadspace;
+    let totalheight = this.stroke/2 + this.rodlength + this.deadspace;
     let portheight = totalheight - (this.pivotseparation + this.portthrow); // mm - height of port centres from top of cylinder
 
     // say that the effective diameter is the smaller of the two
