@@ -21,7 +21,6 @@ function Engine() {
     this.speedofsound = 343; // m/s
     this.airflowmethod = 'empirical'; // empirical/bernoulli/linear
 
-    this.loadpercylpres = 0;
     this.loadperrpm = 0;
 
     // state:
@@ -103,7 +102,7 @@ Engine.prototype.step = function(dt) {
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
-    let loadtorque = this.frictiontorque + (this.loadpercylpres * this.cylinderpressure) + (this.loadperrpm * this.rpm);
+    let loadtorque = this.frictiontorque + (this.loadperrpm * this.rpm);
     let friction_angaccel = loadtorque / this.flywheelmomentofinertia; // rad/s^2
     let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
@@ -113,8 +112,6 @@ Engine.prototype.step = function(dt) {
     } else {
         this.rpm += friction_deltarpm;
     }
-
-    //this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
     this.sumrpm += this.rpm;
 
@@ -199,6 +196,24 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
         // 3. compute mass flow
         let volumeFlow = vel * area * 1e-6; // m^3 / sec
         let massFlow = volumeFlow * rho; // kg / sec
+        return massFlow;
+    } else if (this.airflowmethod == 'tlv') {
+        // derived from https://www.tlv.com/global/UK/calculator/air-flow-rate-through-orifice.html
+        let pressureDifference = pressure1 - pressure2;
+        let pressureRatio = pressureDifference / pressure1;
+        let specificHeatRatio = 1.4;
+        let F_gamma = specificHeatRatio/1.4; // "specific heat ratio factor"
+        let x_T = 0.72; // "pressure differential ratio factor"
+        let C = 0.63; // "discharge coefficient"
+        let T_a = 20; // air temperature (deg. C)
+
+        let Q_a; // Normal m^3/min
+        if (pressureRatio < F_gamma*x_T) {
+            Q_a = 0.0695 * C * (area/5.4143) * pressure1 * (1 - (pressureRatio / (3*F_gamma*x_T))) * Math.sqrt(pressureRatio / (T_a+273.15));
+        } else {
+            Q_a = 0.046333 * C * (area/5.4143) * pressure1 * Math.sqrt((F_gamma*x_T)/(T_a+273.15));
+        }
+        let massFlow = Q_a * this.airdensity / 60; // kg/sec
         return massFlow;
     } else { // this.airflowmethod == 'linear'
         let airFlowRate = 10; // kg/(m^2.kPa.sec)
