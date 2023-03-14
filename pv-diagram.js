@@ -36,9 +36,9 @@ PVDiagram.prototype.draw = function(w,h,plotPoint) {
     let inlet_h = (this.inletpressure-minp)*(h/(maxp-minp));
     let atmos_h = (this.atmosphericpressure-minp)*(h/(maxp-minp));
     stroke(0,200,200);
-    line(0,10+h-atmos_h,w,10+h-atmos_h);
+    line(10,10+h-atmos_h,10+w,10+h-atmos_h);
     stroke(200,0,0);
-    line(0,10+h-inlet_h,w,10+h-inlet_h);
+    line(10,10+h-inlet_h,10+w,10+h-inlet_h);
 
     for (let i = 1; i < this.points.length; i++) {
         let p0 = (this.points[i-1][0]-minp)*(h/(maxp-minp));
