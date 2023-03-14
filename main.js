@@ -3,6 +3,8 @@ var engine;
 var pvdiagram;
 var timingdiagram;
 
+var paused = false;
+
 var piston_height_px = 10;
 
 var canvasmargin = 20; // px
@@ -96,16 +98,19 @@ function draw() {
 
     document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
 
-    let secs = deltaTime / 1000.0;
     let timeFactor = val('timefactor')/100;
     txt('timefactorlabel', timeFactor);
-    let stepTime = 0.0001;
-    let steps = timeFactor * secs/stepTime;
-    if (steps > 10000) steps = 10000;
-    for (let i = 0; i < steps; i++) {
-        engine.step(stepTime);
-        pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
-        timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
+
+    if (!paused) {
+        let secs = deltaTime / 1000.0;
+        let stepTime = 0.0001;
+        let steps = timeFactor * secs/stepTime;
+        if (steps > 10000) steps = 10000;
+        for (let i = 0; i < steps; i++) {
+            engine.step(stepTime);
+            pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+            timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
+        }
     }
 
     background(220);
@@ -291,4 +296,9 @@ btn('reset', function() {
         document.getElementById(field).value = defaults[field];
     }
     update();
+});
+btn('pauseresume', function() {
+    paused = !paused;
+    if (paused) txt('pauseresume', 'Resume');
+    else txt('pauseresume', 'Pause');
 });
