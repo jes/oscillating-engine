@@ -281,9 +281,6 @@ function loadPreset(p) {
 }
 
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
-btn('loadpreset', function() {
-    loadPreset(txtval('preset'));
-});
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
 };
