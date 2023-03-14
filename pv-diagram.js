@@ -15,7 +15,7 @@ PVDiagram.prototype.clear = function() {
     this.points = [];
 };
 
-PVDiagram.prototype.draw = function(w,h) {
+PVDiagram.prototype.draw = function(w,h,plotPoint) {
     if (this.points.length == 0) return;
 
     let minp = this.atmosphericpressure;
@@ -47,5 +47,14 @@ PVDiagram.prototype.draw = function(w,h) {
         let v1 = (this.points[i][1]-minv)*(w/(maxv-minv));
         stroke(200 - ((i*i)/(this.points.length*this.points.length))*200);
         line(10+v0,10+h-p0, 10+v1,10+h-p1);
+    }
+
+    if (plotPoint) {
+        push();
+        stroke(0); fill(0);
+        let p = (this.points[this.points.length-1][0]-minp)*(h/(maxp-minp));
+        let v = (this.points[this.points.length-1][1]-minv)*(w/(maxv-minv));
+        circle(10+v,10+h-p,5);
+        pop();
     }
 };
