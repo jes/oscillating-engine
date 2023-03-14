@@ -19,7 +19,7 @@ function Engine() {
     this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
-    this.airflowmethod = 'empirical'; // empirical/bernoulli/linear
+    this.airflowmethod = 'tlv'; // tlv/trident1/trident2/bernoulli/linear
 
     this.loadperrpm = 0;
 
@@ -168,13 +168,13 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     // is the air flowing the correct way?
     if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
 
-    if (this.airflowmethod == 'empirical') {
+    if (this.airflowmethod == 'trident1') {
         // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
         let pressureDifference = pressure1 - pressure2;
         let kg_per_sec_mm2_kpa = 0.000035/Math.pow(pressureDifference,0.73)+0.00000154;
         let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
         return massFlow;
-    } else if (this.airflowmethod == 'empirical2') {
+    } else if (this.airflowmethod == 'trident2') {
         // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
         let pressureDifference = pressure1 - pressure2;
         let kg_per_sec_mm2_kpa = 0.0000315/Math.pow(pressureDifference,0.71)+0.00000155;
