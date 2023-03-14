@@ -21,6 +21,9 @@ function Engine() {
     this.speedofsound = 343; // m/s
     this.airflowmethod = 'empirical'; // empirical/bernoulli/linear
 
+    this.loadpercylpres = 0;
+    this.loadperrpm = 0;
+
     // state:
     this.cylinderpressure = 0; // kPa
     this.crankposition = 0; // degrees - TDC=0
@@ -100,7 +103,8 @@ Engine.prototype.step = function(dt) {
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
-    let friction_angaccel = this.frictiontorque / this.flywheelmomentofinertia; // rad/s^2
+    let loadtorque = this.frictiontorque + (this.loadpercylpres * this.cylinderpressure) + (this.loadperrpm * this.rpm);
+    let friction_angaccel = loadtorque / this.flywheelmomentofinertia; // rad/s^2
     let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
         this.rpm = 0;
@@ -110,7 +114,7 @@ Engine.prototype.step = function(dt) {
         this.rpm += friction_deltarpm;
     }
 
-    this.rpm -= this.rpm * 0.1*dt; // TODO: ???
+    //this.rpm -= this.rpm * 0.1*dt; // TODO: ???
 
     this.sumrpm += this.rpm;
 
@@ -171,6 +175,12 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
         // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
         let pressureDifference = pressure1 - pressure2;
         let kg_per_sec_mm2_kpa = 0.000035/Math.pow(pressureDifference,0.73)+0.00000154;
+        let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
+        return massFlow;
+    } else if (this.airflowmethod == 'empirical2') {
+        // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
+        let pressureDifference = pressure1 - pressure2;
+        let kg_per_sec_mm2_kpa = 0.0000315/Math.pow(pressureDifference,0.71)+0.00000155;
         let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
         return massFlow;
     } else if (this.airflowmethod == 'bernoulli') {

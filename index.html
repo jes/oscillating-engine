@@ -62,8 +62,11 @@ label {
     <label for="atmosphericpressure">Atmospheric pressure: </label> <input type="text" id="atmosphericpressure" value="101.325"> kPa<br>
     <label for="inletpressure">Inlet pressure: </label> <input type="text" id="inletpressure" value="50"> kPa <small>above atmospheric</small><br>
     <label for="frictiontorque">Load: </label> <input type="text" id="frictiontorque" value="0.01"> Nm<br>
+    <label for="loadpercylpres">Load per cylinder pressure: </label> <input type="text" id="loadpercylpres" value="0"> Nm kPa<sup>-1</sup><br>
+    <label for="loadperrpm">Load per rpm: </label> <input type="text" id="loadperrpm" value="0"> Nm / rpm<br>
     <label for="airflowmethod">Air flow method: </label> <select id="airflowmethod">
         <option value="empirical">Empirical</option>
+        <option value="empirical2">Empirical 2</option>
         <option value="bernoulli">Bernoulli's equation</option>
         <option value="linear">Linear</option>
     </select><br>
