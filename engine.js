@@ -78,8 +78,8 @@ Engine.prototype.step = function(dt) {
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
     // if port is not fully exposed, reduce areas accordingly
-    inletPortArea = this.reducedPortArea(inletPortArea, this.inletportdiameter, this.cylinderportdiameter); // mm^2
-    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.exhaustportdiameter, this.cylinderportdiameter); // mm^2
+    inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter); // mm^2
+    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter); // mm^2
     this.inletportarea = inletPortArea;
     this.exhaustportarea = exhaustPortArea;
 
@@ -248,12 +248,9 @@ Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) 
     }
 };
 
-Engine.prototype.reducedPortArea = function(area, d1, d2) {
+Engine.prototype.reducedPortArea = function(area, d) {
     let totalheight = this.stroke/2 + this.rodlength + this.deadspace;
     let portheight = totalheight - (this.pivotseparation + this.portthrow); // mm - height of port centres from top of cylinder
-
-    // say that the effective diameter is the smaller of the two
-    let d = (d1 < d2) ? d1 : d2;
 
     if (this.pistonheight < portheight-d/2) {
         // port is completely covered up
