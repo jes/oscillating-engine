@@ -6,27 +6,38 @@ function TimingDiagram(npoints) {
 }
 
 TimingDiagram.prototype.angle2index = function(angle) {
-    return Math.floor(angle * this.npoints / 360.0);
+    return Math.floor(angle * (this.npoints-1) / 360.0);
 };
 
 TimingDiagram.prototype.index2angle = function(index) {
-    return index * 360.0 / this.npoints;
+    return index * 360.0 / (this.npoints-1);
 };
 
 TimingDiagram.prototype.add = function(angle, inlet, exhaust) {
-    // XXX: do nothing if we crossed 0 (TODO: fill in the points either side of 0?)
-    if (Math.abs(angle-this.lastpos) > 180) {
-        this.lastpos = angle;
-        return;
-    }
+    angle %= 360.0;
+    if (angle < 0) angle += 360.0;
 
     let i0 = this.angle2index(this.lastpos);
     let i1 = this.angle2index(angle);
 
-    if (i0 > i1) [i0,i1] = [i1,i0];
+    let diff = Math.abs(angle-this.lastpos);
+    let di = 1;
+    if (angle > this.lastpos && diff > 180 || angle < this.lastpos && diff <= 180) di = -1;
 
-    for (let i = i0; i <= i1; i++)
+    if (i0 < 0 || i0 >= this.npoints || i1 < 0 || i1 >= this.npoints) {
+        console.log([this.lastpos,angle,i0,i1,this.npoints,di]);
+        return;
+    }
+
+    let i = i0;
+    while (true) {
         this.points[i] = [inlet, exhaust];
+        if (i == i1) break;
+        i += di;
+        if (i >= this.npoints) i = 0;
+        if (i < 0) i = this.npoints-1;
+    };
+
     this.lastpos = angle;
 };
 
