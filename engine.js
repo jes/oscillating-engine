@@ -102,7 +102,7 @@ Engine.prototype.step = function(dt) {
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
-    let loadtorque = this.frictiontorque + (this.loadperrpm * this.rpm);
+    let loadtorque = this.frictiontorque + (this.loadperrpm * Math.abs(this.rpm));
     let friction_angaccel = loadtorque / this.flywheelmomentofinertia; // rad/s^2
     let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
@@ -115,9 +115,9 @@ Engine.prototype.step = function(dt) {
 
     this.sumrpm += this.rpm;
 
-    // update crank position (first pass)
+    // update crank position
     this.crankposition += (this.rpm * 360 / 60) * dt;
-    if (this.crankposition > 360) {
+    if (this.crankposition > 360 || this.crankposition < 0) {
         this.torque = this.sumtorque / this.torquepoints;
         this.meanrpm = this.sumrpm / this.torquepoints;
         this.power = this.torque * Math.PI * this.meanrpm / 30;
