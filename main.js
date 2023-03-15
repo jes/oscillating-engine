@@ -142,6 +142,13 @@ function draw() {
     txt('power', round(engine.power, 3));
     txt('horsepower', round(engine.power/746, 5));
     txt('cc', round(PI * (engine.bore/20)*(engine.bore/20) * (engine.stroke/10), 2));
+    let energy = engine.power / (engine.meanrpm/ 60);
+    txt('energy', round(energy, 3));
+    txt('airmass', round(engine.airmass, 7));
+    let airenergy = engine.inletpressure * 1000 * engine.airmass * (engine.inletpressure/engine.atmosphericpressure) * engine.airdensity;
+    txt('airenergy', round(airenergy, 3));
+    let efficiency = energy / airenergy;
+    txt('efficiency', round(efficiency*100, 2));
 }
 
 function drawFlywheel() {

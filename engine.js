@@ -50,6 +50,8 @@ Engine.prototype.reset = function() {
     this.torque = 0;
     this.meanrpm = 0;
     this.power = 0;
+    this.sumairmass = 0;
+    this.airmass = 0;
 };
 
 Engine.prototype.step = function(dt) {
@@ -114,16 +116,19 @@ Engine.prototype.step = function(dt) {
     }
 
     this.sumrpm += this.rpm;
+    this.sumairmass += inletAirMass;
 
     // update crank position
     this.crankposition += (this.rpm * 360 / 60) * dt;
     if (this.crankposition > 360 || this.crankposition < 0) {
         this.torque = this.sumtorque / this.torquepoints;
         this.meanrpm = this.sumrpm / this.torquepoints;
+        this.airmass = this.sumairmass;
         this.power = this.torque * Math.PI * this.meanrpm / 30;
         this.sumtorque = 0;
         this.sumrpm = 0;
         this.torquepoints = 0;
+        this.sumairmass = 0;
     }
     this.crankposition %= 360.0;
     if (this.crankposition < 0) this.crankposition += 360.0;
