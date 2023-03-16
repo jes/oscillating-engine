@@ -139,7 +139,7 @@ function draw() {
 
     // draw the pressure-volume diagram
     translate(engine_centre_px*2,0); // offset to clear the engine
-    pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, timeFactor*engine.rpm<120); // draw inside the reset of the canvas
+    pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120)); // draw inside the reset of the canvas
 
     txt('rpm', round(engine.rpm, 2));
     txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
