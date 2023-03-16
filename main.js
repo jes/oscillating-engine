@@ -23,6 +23,8 @@ var defaults = {
     airflowmethod: "tlv",
 };
 
+var pvcount = 0;
+
 var presets = {
     wigwag: {
         stroke: 30,
@@ -82,7 +84,7 @@ function setup() {
 
     engine = new Engine();
 
-    pvdiagram = new PVDiagram(5000);
+    pvdiagram = new PVDiagram(500);
     timingdiagram = new TimingDiagram(1000);
 
     loadPreset(txtval('preset'));
@@ -104,12 +106,15 @@ function draw() {
 
     if (!paused) {
         let secs = deltaTime / 1000.0;
-        let stepTime = 0.0001;
+        let stepTime = 0.00005;
         let steps = timeFactor * secs/stepTime;
         if (steps > 10000) steps = 10000;
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
-            pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+            if (pvcount++ == 20) {
+                pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+                pvcount = 0;
+            }
             timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
         }
     }
