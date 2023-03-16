@@ -84,7 +84,7 @@ function setup() {
 
     engine = new Engine();
 
-    pvdiagram = new PVDiagram(500);
+    pvdiagram = new PVDiagram(2500);
     timingdiagram = new TimingDiagram(1000);
 
     loadPreset(txtval('preset'));
@@ -111,7 +111,7 @@ function draw() {
         if (steps > 10000) steps = 10000;
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
-            if (pvcount++ == 20) {
+            if (pvcount++ == 4) {
                 pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
                 pvcount = 0;
             }
