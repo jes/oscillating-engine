@@ -12,7 +12,7 @@ var px_per_mm;
 
 var engine_centre_px = 150;
 
-var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm'];
+var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load'];
 var anychanged = false;
 
 var defaults = {
@@ -20,6 +20,7 @@ var defaults = {
     inletpressure: "50",
     frictiontorque: "0.001",
     loadperrpm: "0.00003",
+    load: "0",
     airflowmethod: "tlv",
 };
 
@@ -147,10 +148,8 @@ function draw() {
     txt('power', round(engine.power, 3));
     txt('horsepower', round(engine.power/746, 5));
     txt('cc', round(PI * (engine.bore/20)*(engine.bore/20) * (engine.stroke/10), 2));
-    let energy = engine.power / (engine.meanrpm/ 60);
-    let airenergy = (engine.inletpressure-engine.atmosphericpressure) * 1000 * engine.airmass * (engine.inletpressure/engine.atmosphericpressure) * engine.airdensity;
-    let efficiency = energy / airenergy;
-    txt('efficiency', round(efficiency*100, 2));
+    txt('rawefficiency', round(engine.rawefficiency*100, 2));
+    txt('efficiency', round(engine.efficiency*100, 2));
 }
 
 function drawFlywheel() {

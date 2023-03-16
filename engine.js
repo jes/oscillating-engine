@@ -16,12 +16,13 @@ function Engine() {
     this.flywheelmomentofinertia = 0.000203; // kg m^2
     this.atmosphericpressure = 101.325; // kPa
     this.inletpressure = this.atmosphericpressure + 50; // kPa
-    this.frictiontorque = 0.01; // Nm, opposing the flywheel rotation
+    this.frictiontorque = 0.001; // Nm, opposing the flywheel rotation
+    this.loadperrpm = 0.00003; // Nm/rpm, opposing flywheel rotation
+    this.load = 0; // Nm
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
     this.airflowmethod = 'tlv'; // tlv/trident1/trident2/bernoulli/linear
 
-    this.loadperrpm = 0;
 
     // state:
     this.cylinderpressure = 0; // kPa
@@ -44,14 +45,18 @@ Engine.prototype.reset = function() {
     this.rpm = 200;
     this.computeCylinderPosition();
 
+    this.sumrawtorque = 0;
     this.sumtorque = 0;
     this.sumrpm = 0;
     this.torquepoints = 0;
+    this.rawtorque = 0;
     this.torque = 0;
     this.meanrpm = 0;
     this.power = 0;
     this.sumairmass = 0;
     this.airmass = 0;
+    this.rawefficiency = 0;
+    this.efficiency = 0;
 };
 
 Engine.prototype.step = function(dt) {
@@ -96,16 +101,13 @@ Engine.prototype.step = function(dt) {
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
 
-    this.sumtorque += crankTorque;
-    this.torquepoints++;
-
     // calculate flywheel angular velocity with piston torque
-    let angularacceleration = crankTorque / this.flywheelmomentofinertia; // rad/s^2
+    let angularacceleration = (crankTorque - this.load) / this.flywheelmomentofinertia; // rad/s^2
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
-    let loadtorque = this.frictiontorque + (this.loadperrpm * Math.abs(this.rpm));
-    let friction_angaccel = loadtorque / this.flywheelmomentofinertia; // rad/s^2
+    let lossTorque = this.frictiontorque + (this.loadperrpm * Math.abs(this.rpm));
+    let friction_angaccel = lossTorque / this.flywheelmomentofinertia; // rad/s^2
     let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
         this.rpm = 0;
@@ -115,16 +117,22 @@ Engine.prototype.step = function(dt) {
         this.rpm += friction_deltarpm;
     }
 
+    this.sumrawtorque += crankTorque;
+    this.sumtorque += crankTorque - lossTorque;
+    this.torquepoints++;
     this.sumrpm += this.rpm;
     this.sumairmass += inletAirMass;
 
     // update crank position
     this.crankposition += (this.rpm * 360 / 60) * dt;
     if (this.crankposition > 360 || this.crankposition < 0) {
+        this.rawtorque = this.sumrawtorque / this.torquepoints;
         this.torque = this.sumtorque / this.torquepoints;
         this.meanrpm = this.sumrpm / this.torquepoints;
         this.airmass = this.sumairmass;
+        this.rawpower = this.rawtorque * Math.PI * this.meanrpm / 30;
         this.power = this.torque * Math.PI * this.meanrpm / 30;
+        this.sumrawtorque = 0;
         this.sumtorque = 0;
         this.sumrpm = 0;
         this.torquepoints = 0;
@@ -137,6 +145,13 @@ Engine.prototype.step = function(dt) {
 
     // calculate updated cylinder pressure
     this.cylinderpressure = this.computePressure(currentAirMass + inletAirMass - exhaustAirMass, this.cylindervolume);
+
+    // calculate updated efficiency
+    let energy = this.power / (this.meanrpm/ 60);
+    let rawenergy = this.rawpower / (this.meanrpm/ 60);
+    let airenergy = (this.inletpressure-this.atmosphericpressure) * 1000 * this.airmass * (this.inletpressure/this.atmosphericpressure) * this.airdensity;
+    this.efficiency = energy / airenergy;
+    this.rawefficiency = rawenergy / airenergy;
 };
 
 Engine.prototype.computeCylinderPosition = function() {
