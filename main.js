@@ -19,7 +19,7 @@ var defaults = {
     atmosphericpressure: "101.325",
     inletpressure: "50",
     frictiontorque: "0.001",
-    loadperrpm: "0.00003",
+    loadperrpm: "0.000025",
     load: "0",
     airflowmethod: "tlv",
 };
