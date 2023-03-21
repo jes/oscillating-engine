@@ -57,6 +57,11 @@ Engine.prototype.reset = function() {
     this.airmass = 0;
     this.rawefficiency = 0;
     this.efficiency = 0;
+
+    this.stable = false;
+    this.onstable = null;
+    this.stalled = false;
+    this.onstalled = null;
 };
 
 Engine.prototype.step = function(dt) {
@@ -103,6 +108,7 @@ Engine.prototype.step = function(dt) {
 
     // calculate flywheel angular velocity with piston torque
     let angularacceleration = (crankTorque - this.load) / this.flywheelmomentofinertia; // rad/s^2
+    let oldrpm = this.rpm;
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
@@ -123,9 +129,16 @@ Engine.prototype.step = function(dt) {
     this.sumrpm += this.rpm;
     this.sumairmass += inletAirMass;
 
+    // engine stalled/reversed if the product of new and old rpm is <= 0
+    let wasstalled = this.stalled;
+    this.stalled = (this.rpm * oldrpm) <= 0;
+    if (this.stalled && !wasstalled && this.onstalled) this.onstalled();
+
     // update crank position
     this.crankposition += (this.rpm * 360 / 60) * dt;
     if (this.crankposition > 360 || this.crankposition < 0) {
+        let oldmeanrpm = this.meanrpm;
+
         this.rawtorque = this.sumrawtorque / this.torquepoints;
         this.torque = this.sumtorque / this.torquepoints;
         this.meanrpm = this.sumrpm / this.torquepoints;
@@ -137,6 +150,9 @@ Engine.prototype.step = function(dt) {
         this.sumrpm = 0;
         this.torquepoints = 0;
         this.sumairmass = 0;
+
+        this.stable = Math.abs(this.meanrpm-oldmeanrpm) < this.meanrpm*0.001;
+        if (this.stable && this.onstable) this.onstable();
     }
     this.crankposition %= 360.0;
     if (this.crankposition < 0) this.crankposition += 360.0;

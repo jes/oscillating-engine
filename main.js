@@ -294,6 +294,15 @@ function loadPreset(p) {
     }
 }
 
+function setLoad(l) {
+    engine.load = parseFloat(l);
+    document.getElementById('load').value = l;
+}
+
+function toCSV(pts) {
+    return "rpm,torque_Nm,power_W\n" + pts.map((el) => el.join(",")).join("\n");
+}
+
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
@@ -310,4 +319,32 @@ btn('pauseresume', function() {
     paused = !paused;
     if (paused) txt('pauseresume', 'Resume');
     else txt('pauseresume', 'Pause');
+});
+btn('plottorquecurve', function() {
+    let before = txtval('load');
+    setLoad(0);
+    engine.reset();
+    pvdiagram.clear();
+    timingdiagram.clear();
+    txt('torquedata', '');
+
+    let loadStep = 0.0005; // Nm
+    let datapoints = [];
+
+    engine.onstable = function() {
+        datapoints.unshift([engine.rpm.toFixed(1), engine.torque.toFixed(4), engine.power.toFixed(4)]);
+        txt('torquedata', toCSV(datapoints));
+
+        setLoad((engine.load + loadStep).toFixed(4));
+    };
+    engine.onstalled = function() {
+        datapoints.unshift([0, engine.load, 0]);
+        txt('torquedata', toCSV(datapoints));
+
+        setLoad(before);
+
+        engine.reset();
+        pvdiagram.clear();
+        timingdiagram.clear();
+    };
 });
