@@ -99,12 +99,24 @@ function setup() {
         type: 'line',
         data: [],
         options: {
+            events: [],
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#000',
+                    },
+                },
+            },
             scales: {
                 x: {
                     type: 'linear',
                     title: {
                         display: true,
                         text: 'RPM',
+                        color: '#000',
+                    },
+                    ticks: {
+                        color: '#000',
                     },
                     position: 'bottom',
                     beginAtZero: true,
@@ -114,18 +126,26 @@ function setup() {
                     title: {
                         display: true,
                         text: 'Torque (Nm)',
+                        color: '#000',
                     },
                     position: 'left',
                     beginAtZero: true,
+                    ticks: {
+                        color: '#000',
+                    },
                 },
                 y2: {
                     type: 'linear',
                     title: {
                         display: true,
                         text: 'Power (W)',
+                        color: '#000',
                     },
                     position: 'right',
                     beginAtZero: true,
+                    ticks: {
+                        color: '#000',
+                    },
                 },
             },
             animation: {
@@ -354,10 +374,14 @@ function plotTorqueCurve(pts) {
                 label: 'Torque',
                 data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[1])} }),
                 yAxisID: 'y',
+                borderColor: '#4a4',
+                backgroundColor: '#4a4',
             }, {
                 label: 'Power',
                 data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[2])} }),
                 yAxisID: 'y2',
+                borderColor: '#c71',
+                backgroundColor: '#c71',
             },
         ],
     };
