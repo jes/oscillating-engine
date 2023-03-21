@@ -460,8 +460,6 @@ btn('plottorquecurve', function() {
         setLoad(engine.load + val('loadstep'));
     };
     engine.onstalled = function() {
-        datapoints.unshift([0, engine.load, 0]);
-        plotTorqueCurve(datapoints);
         txt('torquestatus', 'Finished.');
 
         setLoad(before);
