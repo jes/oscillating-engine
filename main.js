@@ -116,7 +116,6 @@ function setup() {
                 point: { radius: 2 },
                 line: { borderWidth: 2 },
             },
-            events: [],
             plugins: {
                 legend: {
                     labels: {
@@ -171,6 +170,20 @@ function setup() {
                         color: '#000',
                     },
                 },
+                y3: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Efficiency (%)',
+                        color: '#000',
+                    },
+                    position: 'right',
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#000',
+                    },
+                },
+
             },
             animation: {
                 duration: 0,
@@ -401,17 +414,23 @@ function plotTorqueCurve(pts) {
         datasets: [
             {
                 label: 'Torque',
-                data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[1])} }),
+                data: pts.map(function(el) { return {"x":el[0], "y":el[1]} }),
                 yAxisID: 'y',
                 borderColor: '#4a4',
                 backgroundColor: '#4a4',
             }, {
                 label: 'Power',
-                data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[2])} }),
+                data: pts.map(function(el) { return {"x":el[0], "y":el[2]} }),
                 yAxisID: 'y2',
                 borderColor: '#c71',
                 backgroundColor: '#c71',
-            },
+            }, {
+                label: 'Efficiency',
+                data: pts.map(function(el) { return {"x":el[0], "y":el[3]*100} }),
+                yAxisID: 'y3',
+                borderColor: '#17c',
+                backgroundColor: '#17c',
+            }
         ],
     };
     torqueCurveChart.update();
@@ -453,7 +472,7 @@ btn('plottorquecurve', function() {
     let datapoints = [];
 
     engine.onstable = function() {
-        datapoints.unshift([engine.rpm, engine.torque, engine.power]);
+        datapoints.unshift([engine.rpm, engine.torque, engine.power, engine.efficiency]);
         plotTorqueCurve(datapoints);
         txt('torquestatus', 'Plotting...');
 
