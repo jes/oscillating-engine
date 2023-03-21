@@ -183,8 +183,9 @@ function setup() {
 
 function draw() {
     anychanged = false;
+    let eps = 0.00000001;
     for (let i = 0; i < floatfields.length; i++) {
-        check(floatfields[i], engine[floatfields[i]] == val(floatfields[i]));
+        check(floatfields[i], Math.abs(engine[floatfields[i]] - val(floatfields[i])) < eps);
     }
     check('inletpressure', engine.inletpressure == val('inletpressure')+engine.atmosphericpressure);
     check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
@@ -385,7 +386,7 @@ function loadPreset(p) {
 
 function setLoad(l) {
     engine.load = l;
-    document.getElementById('load').value = l;
+    document.getElementById('load').value = Math.round(l*10000000)/10000000;
 }
 
 function toCSV(pts) {
