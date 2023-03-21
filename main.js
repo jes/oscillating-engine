@@ -95,16 +95,40 @@ function setup() {
 
     let ctx = document.getElementById('chartcanvas');
 
+    const plugin = {
+        id: 'customCanvasBackgroundColor',
+        beforeDraw: (chart, args, options) => {
+            const {ctx} = chart;
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.fillStyle = options.color || '#99ffff';
+            ctx.fillRect(0, 0, chart.width, chart.height);
+            ctx.restore();
+        }
+    };
+
     torqueCurveChart = new Chart(ctx, {
         type: 'line',
         data: [],
         options: {
+            responsive: false,
+            elements: {
+                point: { radius: 2 },
+                line: { borderWidth: 2 },
+            },
             events: [],
             plugins: {
                 legend: {
                     labels: {
                         color: '#000',
                     },
+                },
+                title: {
+                    display: true,
+                    color: '#000',
+                },
+                customCanvasBackgroundColor: {
+                    color: '#eee',
                 },
             },
             scales: {
@@ -152,6 +176,7 @@ function setup() {
                 duration: 0,
             },
         },
+        plugins: [plugin],
     });
 
 }
@@ -359,7 +384,7 @@ function loadPreset(p) {
 }
 
 function setLoad(l) {
-    engine.load = parseFloat(l);
+    engine.load = l;
     document.getElementById('load').value = l;
 }
 
@@ -417,17 +442,18 @@ btn('plottorquecurve', function() {
     timingdiagram.clear();
     txt('torquestatus', 'Accelerating...');
 
+    torqueCurveChart.options.plugins.title.text = txtval('charttitle');
+
     document.getElementById('chartcanvas').style.display = 'block';
 
-    let loadStep = 0.0005; // Nm
     let datapoints = [];
 
     engine.onstable = function() {
-        datapoints.unshift([engine.rpm.toFixed(1), engine.torque.toFixed(4), engine.power.toFixed(4)]);
+        datapoints.unshift([engine.rpm, engine.torque, engine.power]);
         plotTorqueCurve(datapoints);
         txt('torquestatus', 'Plotting...');
 
-        setLoad((engine.load + loadStep).toFixed(4));
+        setLoad(engine.load + val('loadstep'));
     };
     engine.onstalled = function() {
         datapoints.unshift([0, engine.load, 0]);

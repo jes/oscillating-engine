@@ -7,9 +7,14 @@
 input {
     width: 100px;
 }
-label {
+#params label {
     display: inline-block;
     width: 250px;
+    text-align: right;
+}
+.torquecurve label {
+    display: inline-block;
+    width: 110px;
     text-align: right;
 }
 </style>
@@ -76,13 +81,19 @@ label {
 
     <br>
     <label></label> <button id="update">Apply</button> <button id="reset">Reset</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
-    <br><br>
-    <label></label> <button id="plottorquecurve">Plot torque curve</button> <i><span id="torquestatus"></span></i>
 </div>
 
 <div style="clear:both"></div>
 
-<canvas style="background: #eee; display:none" id="chartcanvas"></canvas>
+<br>
+
+<div class="torquecurve">
+<label for="loadstep">Step size:</label> <input type="text" id="loadstep" value="0.0005"> Nm<br>
+<label for="charttitle">Chart title:</label> <input style="width: 300px" type="text" id="charttitle" value="Oscillating Engine Torque Curve"><br>
+<label></label> <button id="plottorquecurve">Plot torque curve</button> <i><span id="torquestatus"></span></i>
+
+<canvas width="600" height="400" style="display:none" id="chartcanvas"></canvas>
+</div>
 
 <hr>
 
