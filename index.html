@@ -75,13 +75,14 @@ label {
     </select><br>
 
     <br>
-    <button id="update">Apply</button> <button id="reset">Reset</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
-    <br>
-    <button id="plottorquecurve">Plot torque curve</button>
-    <tt><span id="torquedata"></span></tt>
+    <label></label> <button id="update">Apply</button> <button id="reset">Reset</button> <span id="pendingchanges"><i>Pending changes, click "Apply"</i></span>
+    <br><br>
+    <label></label> <button id="plottorquecurve">Plot torque curve</button> <i><span id="torquestatus"></span></i>
 </div>
 
 <div style="clear:both"></div>
+
+<canvas style="display:none" id="chartcanvas"></canvas>
 
 <hr>
 
@@ -90,6 +91,7 @@ label {
 <i>Thanks to <a href="https://wigwagengine.wixsite.com/wigwag">Ade Swash for the "Wig-Wag" engine</a>, <a href="http://www.steves-workshop.co.uk/steammodels/simpleoscil/simpleoscil.htm">Steve Bodiley for the "Steve's Workshop" engine</a>, and <a href="https://www.modelengineeringwebsite.com/Wobler_oscillator.html">Julius de Waal for the "Wobler" engine</a>.</i><br>
 <i>Thanks to <a href="https://www.tlv.com/global/UK/calculator/air-flow-rate-through-orifice.html#">TLV</a> and <a href="https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/">Trident</a> for air flow data and formulae.</i>
 
+<script src="chart.js"></script>
 <script src="p5.min.js"></script>
 <script src="engine.js"></script>
 <script src="pv-diagram.js"></script>

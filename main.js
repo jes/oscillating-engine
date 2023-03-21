@@ -26,6 +26,8 @@ var defaults = {
 
 var pvcount = 0;
 
+var torqueCurveChart;
+
 var presets = {
     wigwag: {
         stroke: 30,
@@ -90,6 +92,48 @@ function setup() {
 
     loadPreset(txtval('preset'));
     update();
+
+    let ctx = document.getElementById('chartcanvas');
+
+    torqueCurveChart = new Chart(ctx, {
+        type: 'line',
+        data: [],
+        options: {
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'RPM',
+                    },
+                    position: 'bottom',
+                    beginAtZero: true,
+                },
+                y: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Torque (Nm)',
+                    },
+                    position: 'left',
+                    beginAtZero: true,
+                },
+                y2: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Power (W)',
+                    },
+                    position: 'right',
+                    beginAtZero: true,
+                },
+            },
+            animation: {
+                duration: 0,
+            },
+        },
+    });
+
 }
 
 function draw() {
@@ -303,6 +347,23 @@ function toCSV(pts) {
     return "rpm,torque_Nm,power_W\n" + pts.map((el) => el.join(",")).join("\n");
 }
 
+function plotTorqueCurve(pts) {
+    torqueCurveChart.config.data = {
+        datasets: [
+            {
+                label: 'Torque',
+                data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[1])} }),
+                yAxisID: 'y',
+            }, {
+                label: 'Power',
+                data: pts.map(function(el) { return {"x":parseFloat(el[0]), "y":parseFloat(el[2])} }),
+                yAxisID: 'y2',
+            },
+        ],
+    };
+    torqueCurveChart.update();
+}
+
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
@@ -314,6 +375,10 @@ btn('reset', function() {
         document.getElementById(field).value = defaults[field];
     }
     update();
+    engine.onstable = null;
+    engine.onstalled = null;
+    document.getElementById('chartcanvas').style.display = 'none';
+    txt('torquestatus', '');
 });
 btn('pauseresume', function() {
     paused = !paused;
@@ -326,20 +391,24 @@ btn('plottorquecurve', function() {
     engine.reset();
     pvdiagram.clear();
     timingdiagram.clear();
-    txt('torquedata', '');
+    txt('torquestatus', 'Accelerating...');
+
+    document.getElementById('chartcanvas').style.display = 'block';
 
     let loadStep = 0.0005; // Nm
     let datapoints = [];
 
     engine.onstable = function() {
         datapoints.unshift([engine.rpm.toFixed(1), engine.torque.toFixed(4), engine.power.toFixed(4)]);
-        txt('torquedata', toCSV(datapoints));
+        plotTorqueCurve(datapoints);
+        txt('torquestatus', 'Plotting...');
 
         setLoad((engine.load + loadStep).toFixed(4));
     };
     engine.onstalled = function() {
         datapoints.unshift([0, engine.load, 0]);
-        txt('torquedata', toCSV(datapoints));
+        plotTorqueCurve(datapoints);
+        txt('torquestatus', 'Finished.');
 
         setLoad(before);
 
