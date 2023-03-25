@@ -550,7 +550,7 @@ btn('plottorquecurve', function() {
     let datapoints = [];
 
     engine.onstable = function() {
-        datapoints.unshift([engine.rpm, engine.torque, engine.power, engine.efficiency]);
+        datapoints.unshift([engine.meanrpm, engine.torque, engine.power, engine.efficiency]);
         plotTorqueCurve(datapoints);
         txt('torquestatus', 'Plotting...');
 
@@ -577,7 +577,7 @@ btn('plotpressurecurve', function() {
     let datapoints = [];
 
     engine.onstable = function() {
-        datapoints.unshift([engine.inletpressure - engine.atmosphericpressure, engine.rpm]);
+        datapoints.unshift([engine.inletpressure - engine.atmosphericpressure, engine.meanrpm]);
         plotPressureCurve(datapoints);
         txt('pressurestatus', 'Plotting...');
 
