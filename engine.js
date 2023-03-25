@@ -21,7 +21,7 @@ function Engine() {
     this.load = 0; // Nm
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
-    this.airflowmethod = 'tlv'; // tlv/trident1/trident2/bernoulli/linear
+    this.airflowmethod = 'tlv'; // tlv/trident1/trident2/bernoulli/linear/billhall
 
 
     // state:
@@ -251,6 +251,19 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
             Q_a = 0.046333 * C * (area/5.4143) * pressure1 * Math.sqrt((F_gamma*x_T)/(T_a+273.15));
         }
         let massFlow = Q_a * this.airdensity / 60; // kg/sec
+        return massFlow;
+    } else if (this.airflowmethod == 'billhall') {
+        // from a document written by Bill Hall about his "Perform.exe" program, sent to me by Duncan Webster
+        let Cd = 0.8; // coefficient of discharge
+        let Ai = area * 1e-6; // m^2
+        let v0 = 1/this.airdensity; // "specific volume"
+        let p0 = pressure1 * 1e3; // Pa
+        let p = pressure2 * 1e3; // Pa
+        let n = 1.4; // heat capacity ratio of air
+        let criticalPressureRatio =  Math.pow(2/(n+1), n/(n-1));
+        let pc = p0 * criticalPressureRatio;
+        let pprime = p > pc ? p : pc;
+        let massFlow = Cd * Ai * (1/v0) * Math.pow(pprime/p0, 1/n) * Math.sqrt(2 * (n/(n-1)) * p0 * v0 * (1 - Math.pow((pprime/p0), (n-1)/n)));
         return massFlow;
     } else { // this.airflowmethod == 'linear'
         let airFlowRate = 10; // kg/(m^2.kPa.sec)
