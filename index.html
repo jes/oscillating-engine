@@ -12,7 +12,7 @@ input {
     width: 250px;
     text-align: right;
 }
-.torquecurve label {
+.torquecurve label, .pressurespeed label {
     display: inline-block;
     width: 110px;
     text-align: right;
@@ -28,7 +28,7 @@ input {
 
 <div id="status">
     <input type="range" min="0" max="9" value="6" id="timefactor">
-    <span id="timefactorlabel">1</span>x<br>
+    <span id="timefactorlabel">1</span>x <span id="tooslow"></span><br>
     <button id="kick">Kick</button> <button id="pauseresume">Pause</button><br>
     <span id="rpm">0</span> rpm
     <br>
@@ -89,12 +89,35 @@ input {
 <hr>
 
 <div class="torquecurve">
+<div style="float: left">
 <label for="loadstep">Step size:</label> <input type="text" id="loadstep" value="0.0005"> Nm<br>
 <label for="charttitle">Chart title:</label> <input style="width: 300px" type="text" id="charttitle" value="Oscillating Engine Torque Curve"><br>
 <label></label> <button id="plottorquecurve">Plot torque curve</button> <i><span id="torquestatus"></span></i>
+</div>
 
+<div style="float: left">
 <canvas width="600" height="400" style="display:none" id="chartcanvas"></canvas>
 </div>
+</div>
+
+<div style="clear:both"></div>
+
+<hr>
+
+<div class="pressurespeed">
+<div style="float: left">
+    <label for="maxpressure">Maximum:</label> <input type="text" id="maxpressure" value="200"> kPa <small>above atmospheric</small><br>
+<label for="pressurestep">Step size:</label> <input type="text" id="pressurestep" value="5"> kPa<br>
+<label for="charttitle2">Chart title:</label> <input style="width: 300px" type="text" id="charttitle2" value="Oscillating Engine Pressure-Speed Curve"><br>
+<label></label> <button id="plotpressurecurve">Plot pressure-speed curve</button> <i><span id="pressurestatus"></span></i>
+</div>
+
+<div style="float: left">
+<canvas width="600" height="400" style="display:none" id="chartcanvas2"></canvas>
+</div>
+</div>
+
+<div style="clear:both"></div>
 
 <hr>
 

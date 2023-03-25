@@ -151,7 +151,7 @@ Engine.prototype.step = function(dt) {
         this.torquepoints = 0;
         this.sumairmass = 0;
 
-        this.stable = Math.abs(this.meanrpm-oldmeanrpm) < this.meanrpm*0.001;
+        this.stable = Math.abs(this.meanrpm-oldmeanrpm) < this.meanrpm*0.0001;
         if (this.stable && this.onstable) this.onstable();
     }
     this.crankposition %= 360.0;

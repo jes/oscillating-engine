@@ -27,6 +27,7 @@ var defaults = {
 var pvcount = 0;
 
 var torqueCurveChart;
+var pressureCurveChart;
 
 var presets = {
     wigwag: {
@@ -94,6 +95,7 @@ function setup() {
     update();
 
     let ctx = document.getElementById('chartcanvas');
+    let ctx2 = document.getElementById('chartcanvas2');
 
     const plugin = {
         id: 'customCanvasBackgroundColor',
@@ -183,7 +185,6 @@ function setup() {
                         color: '#000',
                     },
                 },
-
             },
             animation: {
                 duration: 0,
@@ -192,6 +193,61 @@ function setup() {
         plugins: [plugin],
     });
 
+    pressureCurveChart = new Chart(ctx2, {
+        type: 'line',
+        data: [],
+        options: {
+            responsive: false,
+            elements: {
+                point: { radius: 2 },
+                line: { borderWidth: 2 },
+            },
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    color: '#000',
+                },
+                customCanvasBackgroundColor: {
+                    color: '#eee',
+                },
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Inlet pressure (kPa)',
+                        color: '#000',
+                    },
+                    ticks: {
+                        color: '#000',
+                    },
+                    position: 'bottom',
+                    beginAtZero: true,
+                },
+                y: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'RPM',
+                        color: '#000',
+                    },
+                    position: 'left',
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#000',
+                    },
+                },
+            },
+            animation: {
+                duration: 0,
+            },
+        },
+        plugins: [plugin],
+    });
 }
 
 function draw() {
@@ -211,11 +267,17 @@ function draw() {
     let timeFactor = timescales[parseInt(val('timefactor'))];
     txt('timefactorlabel', timeFactor);
 
+    pvdiagram.inletpressure = engine.inletpressure;
+    pvdiagram.atmosphericpressure = engine.atmosphericpressure;
+
     if (!paused) {
         let secs = deltaTime / 1000.0;
-        let stepTime = 0.00005;
+        let stepTime = 0.00001;
         let steps = timeFactor * secs/stepTime;
-        if (steps > 10000) steps = 10000;
+
+        let maxRuntime = 33; // ms (~30 fps)
+        let start = new Date();
+        txt('tooslow', '');
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
             if (pvcount++ == 4) {
@@ -223,6 +285,10 @@ function draw() {
                 pvcount = 0;
             }
             timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
+            if ((new Date()) - start > maxRuntime) {
+                txt('tooslow', '(!)');
+                break;
+            }
         }
     }
 
@@ -385,9 +451,6 @@ function update() {
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.airflowmethod = txtval('airflowmethod');
 
-    pvdiagram.inletpressure = engine.inletpressure;
-    pvdiagram.atmosphericpressure = engine.atmosphericpressure;
-
     let totalheight_mm = engine.flywheeldiameter/2 + engine.stroke/2 + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
@@ -410,6 +473,8 @@ function toCSV(pts) {
 }
 
 function plotTorqueCurve(pts) {
+    document.getElementById('chartcanvas').style.display = 'block';
+    torqueCurveChart.options.plugins.title.text = txtval('charttitle');
     torqueCurveChart.config.data = {
         datasets: [
             {
@@ -436,6 +501,22 @@ function plotTorqueCurve(pts) {
     torqueCurveChart.update();
 }
 
+function plotPressureCurve(pts) {
+    document.getElementById('chartcanvas2').style.display = 'block';
+    pressureCurveChart.options.plugins.title.text = txtval('charttitle2');
+    pressureCurveChart.config.data = {
+        datasets: [
+            {
+                label: '',
+                data: pts.map(function(el) { return {"x":el[0], "y":el[1]} }),
+                borderColor: '#4a4',
+                backgroundColor: '#4a4',
+            }
+        ],
+    };
+    pressureCurveChart.update();
+}
+
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
@@ -450,6 +531,7 @@ btn('reset', function() {
     engine.onstable = null;
     engine.onstalled = null;
     document.getElementById('chartcanvas').style.display = 'none';
+    document.getElementById('chartcanvas2').style.display = 'none';
     txt('torquestatus', '');
 });
 btn('pauseresume', function() {
@@ -458,16 +540,12 @@ btn('pauseresume', function() {
     else txt('pauseresume', 'Pause');
 });
 btn('plottorquecurve', function() {
-    let before = txtval('load');
+    let before = engine.load;
     setLoad(0);
     engine.reset();
     pvdiagram.clear();
     timingdiagram.clear();
     txt('torquestatus', 'Accelerating...');
-
-    torqueCurveChart.options.plugins.title.text = txtval('charttitle');
-
-    document.getElementById('chartcanvas').style.display = 'block';
 
     let datapoints = [];
 
@@ -482,6 +560,33 @@ btn('plottorquecurve', function() {
         txt('torquestatus', 'Finished.');
 
         setLoad(before);
+
+        engine.reset();
+        pvdiagram.clear();
+        timingdiagram.clear();
+    };
+});
+btn('plotpressurecurve', function() {
+    let before = engine.inletpressure;
+    engine.inletpressure = val('maxpressure') + engine.atmosphericpressure;
+    engine.reset();
+    pvdiagram.clear();
+    timingdiagram.clear();
+    txt('pressurestatus', 'Accelerating...');
+
+    let datapoints = [];
+
+    engine.onstable = function() {
+        datapoints.unshift([engine.inletpressure - engine.atmosphericpressure, engine.rpm]);
+        plotPressureCurve(datapoints);
+        txt('pressurestatus', 'Plotting...');
+
+        engine.inletpressure = engine.inletpressure - val('pressurestep');
+    };
+    engine.onstalled = function() {
+        txt('pressurestatus', 'Finished.');
+
+        engine.inletpressure = before;
 
         engine.reset();
         pvdiagram.clear();
