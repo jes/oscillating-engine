@@ -276,8 +276,10 @@ function draw() {
 
     if (checkedval('doubleacting')) {
         document.getElementById('doubleacting-params').style.display = 'block';
+        document.getElementById('pressure2-span').style.display = 'inline';
     } else {
         document.getElementById('doubleacting-params').style.display = 'none';
+        document.getElementById('pressure2-span').style.display = 'none';
     }
 
     document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
@@ -302,10 +304,12 @@ function draw() {
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
             if (pvcount++ == 4) {
-                pvdiagram.add(engine.cylinderpressure2, engine.cylindervolume2);
+                pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+                // TODO: if (engine.doubleacting) draw 2nd pv diagram
                 pvcount = 0;
             }
             timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
+            // TODO: how to draw secondary timing diagram?
             if ((new Date()) - start > maxRuntime) {
                 txt('tooslow', '(!)');
                 break;
@@ -335,7 +339,8 @@ function draw() {
     pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120)); // draw inside the reset of the canvas
 
     txt('rpm', round(engine.rpm, 2));
-    txt('pressure', round(engine.cylinderpressure2-engine.atmosphericpressure, 2));
+    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
+    txt('pressure2', round(engine.cylinderpressure2-engine.atmosphericpressure, 2));
     txt('torque', round(engine.torque, 5));
     txt('meanrpm', round(engine.meanrpm, 2));
     txt('power', round(engine.power, 3));

@@ -177,7 +177,7 @@ Engine.prototype.step = function(dt) {
     this.sumtorque += crankTorque - lossTorque;
     this.torquepoints++;
     this.sumrpm += this.rpm;
-    this.sumairmass += inletAirMass;
+    this.sumairmass += inletAirMass + (this.doubleacting ? inletAirMass2 : 0);
 
     // engine stalled/reversed if the product of new and old rpm is <= 0
     let wasstalled = this.stalled;
