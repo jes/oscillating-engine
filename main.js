@@ -308,10 +308,16 @@ function draw() {
 
     if (checkedval('doubleacting')) {
         document.getElementById('doubleacting-params').style.display = 'block';
-        document.getElementById('pressure2-span').style.display = 'inline';
     } else {
         document.getElementById('doubleacting-params').style.display = 'none';
+    }
+
+    if (engine.doubleacting) {
+        document.getElementById('pressure2-span').style.display = 'inline';
+        document.getElementById('cc2-span').style.display = 'inline';
+    } else {
         document.getElementById('pressure2-span').style.display = 'none';
+        document.getElementById('cc2-span').style.display = 'none';
     }
 
     document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
@@ -378,6 +384,7 @@ function draw() {
     txt('power', round(engine.power, 3));
     txt('horsepower', round(engine.power/746, 5));
     txt('cc', round(PI * (engine.bore/20)*(engine.bore/20) * (engine.stroke/10), 2));
+    txt('cc2', round(PI * ((engine.bore/20)*(engine.bore/20) - (engine.roddiameter/20)*(engine.roddiameter/20)) * (engine.stroke/10), 2));
     txt('rawefficiency', round(engine.rawefficiency*100, 2));
     txt('efficiency', round(engine.efficiency*100, 2));
 }
