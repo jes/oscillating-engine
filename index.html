@@ -3,7 +3,13 @@
 <head>
 <title>Oscillating engine simulator</title>
 <style type="text/css">
-.changed { background:#fdd }
+.changed {
+    background: #fdd;
+}
+#doubleacting-div {
+    width: 100px;
+    display: inline;
+}
 input {
     width: 100px;
 }
@@ -63,6 +69,21 @@ input {
     <label for="exhaustportangle">Exhaust port angle:</label> <input type="text" id="exhaustportangle"> &deg;<br>
     <label for="flywheeldiameter">Flywheel diameter:</label> <input type="text" id="flywheeldiameter"> mm<br>
     <label for="flywheelmomentofinertia">Flywheel moment of inertia:</label> <input type="text" id="flywheelmomentofinertia"> kg m<sup>2</sup> <small><a href="flywheel.html" target="_blank">[calculator]</a></small><br>
+
+    <label for="doubleacting">Double-acting?</label> <div id="doubleacting-div"><input type="checkbox" id="doubleacting"></div><br>
+
+    <div id="doubleacting-params">
+    <label for="deadspace2">Gap below piston at BDC:</label> <input type="text" id="deadspace2"> mm<br>
+    <label for="pistonlength">Piston height:</label> <input type="text" id="pistonlength"> mm<br>
+    <label for="roddiameter">Rod diameter:</label> <input type="text" id="roddiameter"> mm<br>
+    <label for="portthrow2">Port swing radius:</label> <input type="text" id="portthrow2"> mm<br>
+    <label for="inletportdiameter2">Inlet port diameter:</label> <input type="text" id="inletportdiameter2"> mm<br>
+    <label for="exhaustportdiameter2">Exhaust port diameter:</label> <input type="text" id="exhaustportdiameter2"> mm<br>
+    <label for="cylinderportdiameter2">Cylinder port diameter:</label> <input type="text" id="cylinderportdiameter2"> mm<br>
+    <label for="inletportangle2">Inlet port angle:</label> <input type="text" id="inletportangle2"> &deg;<br>
+    <label for="exhaustportangle2">Exhaust port angle:</label> <input type="text" id="exhaustportangle2"> &deg;<br>
+
+    </div>
 
     <br>
 

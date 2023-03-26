@@ -5,14 +5,14 @@ var timingdiagram;
 
 var paused = false;
 
-var piston_height_px = 10;
+var default_piston_height_px = 10;
 
 var canvasmargin = 20; // px
 var px_per_mm;
 
 var engine_centre_px = 150;
 
-var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load'];
+var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'exhaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2'];
 var anychanged = false;
 
 var defaults = {
@@ -81,6 +81,20 @@ var presets = {
         url: "https://modelengineeringwebsite.com/Wobler_oscillator.html",
     },
 };
+
+let double_acting_params = ['deadspace', 'portthrow', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle'];
+for (let engine in presets) {
+    if (!presets[engine].doubleacting) {
+        presets[engine].doubleacting = false;
+        presets[engine].pistonlength = 5;
+        presets[engine].roddiameter = 2;
+        for (let param of double_acting_params) {
+            presets[engine][param + "2"] = presets[engine][param];
+        }
+        presets[engine].inletportangle2 = -presets[engine].inletportangle2;
+        presets[engine].exhaustportangle2 = -presets[engine].exhaustportangle2;
+    }
+}
 
 function setup() {
     canvas = createCanvas(600, 400);
@@ -258,6 +272,13 @@ function draw() {
     }
     check('inletpressure', engine.inletpressure == val('inletpressure')+engine.atmosphericpressure);
     check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
+    check('doubleacting-div', engine.doubleacting == checkedval('doubleacting'));
+
+    if (checkedval('doubleacting')) {
+        document.getElementById('doubleacting-params').style.display = 'block';
+    } else {
+        document.getElementById('doubleacting-params').style.display = 'none';
+    }
 
     document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
 
@@ -281,7 +302,7 @@ function draw() {
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
             if (pvcount++ == 4) {
-                pvdiagram.add(engine.cylinderpressure, engine.cylindervolume);
+                pvdiagram.add(engine.cylinderpressure2, engine.cylindervolume2);
                 pvcount = 0;
             }
             timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
@@ -314,7 +335,7 @@ function draw() {
     pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120)); // draw inside the reset of the canvas
 
     txt('rpm', round(engine.rpm, 2));
-    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
+    txt('pressure', round(engine.cylinderpressure2-engine.atmosphericpressure, 2));
     txt('torque', round(engine.torque, 5));
     txt('meanrpm', round(engine.meanrpm, 2));
     txt('power', round(engine.power, 3));
@@ -348,10 +369,12 @@ function drawCylinder() {
     let diameter = engine.flywheeldiameter * px_per_mm;
     let pivot_centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
 
+    let piston_height_px = engine.doubleacting ? (engine.pistonlength * px_per_mm) : default_piston_height_px;
+
     // cylinder dimensions
-    let cylinder_height_mm = engine.deadspace + engine.stroke;
+    let cylinder_height_mm = engine.deadspace + engine.stroke + (engine.doubleacting ? engine.deadspace2 : 0);
     let cylinder_width_mm = engine.bore;
-    let cylinder_height_px = cylinder_height_mm * px_per_mm + piston_height_px
+    let cylinder_height_px = cylinder_height_mm * px_per_mm + piston_height_px;
     let cylinder_width_px = cylinder_width_mm * px_per_mm;
 
     translate(engine_centre_px, pivot_centre_px);
@@ -368,12 +391,24 @@ function drawCylinder() {
     fill(gas_colour);
     rect(-cylinder_width_px/2, -pivot_height_mm*px_per_mm, cylinder_width_px, engine.pistonheight * px_per_mm); // cylinder gases
 
+    if (engine.doubleacting) {
+        // height of pivot from bottom of cylinder
+        let pivot_height_mm2 = cylinder_height_mm + engine.pistonlength - pivot_height_mm;
+
+        let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.cylinderpressure2-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
+        gas_colour.setAlpha(127);
+        fill(gas_colour);
+        rect(-cylinder_width_px/2, pivot_height_mm2*px_per_mm, cylinder_width_px, -engine.pistonheight2 * px_per_mm); // cylinder gases
+    }
+
     pop();
 }
 
 function drawPiston() {
     let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2;
+
+    let piston_height_px = engine.doubleacting ? (engine.pistonlength * px_per_mm) : default_piston_height_px;
 
     push();
 
@@ -383,9 +418,11 @@ function drawPiston() {
     rect(-5, 0, 10, -engine.stroke/2 * px_per_mm); // crank
     circle(0, 0, 10);
 
+    let rod_diameter_px = engine.doubleacting ? (engine.roddiameter * px_per_mm) : 10;
+
     translate(0, -engine.stroke/2 * px_per_mm);
     rotate((-engine.crankposition + engine.cylinderangle) * PI/180);
-    rect(-5, 0, 10, -engine.rodlength * px_per_mm); // rod
+    rect(-rod_diameter_px/2, 0, rod_diameter_px, -engine.rodlength * px_per_mm); // rod
     circle(0, 0, 10);
     translate(0, -engine.rodlength * px_per_mm);
     let bore_mm = engine.bore * px_per_mm;
@@ -405,6 +442,12 @@ function drawPorts() {
     circle(engine.exhaustportx*px_per_mm, -engine.exhaustporty*px_per_mm, engine.exhaustportdiameter*px_per_mm);
     circle(engine.cylinderportx*px_per_mm, -engine.cylinderporty*px_per_mm, engine.cylinderportdiameter*px_per_mm);
 
+    if (engine.doubleacting) {
+        circle(engine.inletportx2*px_per_mm, -engine.inletporty2*px_per_mm, engine.inletportdiameter2*px_per_mm);
+        circle(engine.exhaustportx2*px_per_mm, -engine.exhaustporty2*px_per_mm, engine.exhaustportdiameter2*px_per_mm);
+        circle(engine.cylinderportx2*px_per_mm, -engine.cylinderporty2*px_per_mm, engine.cylinderportdiameter2*px_per_mm);
+    }
+
     pop();
 }
 
@@ -417,6 +460,10 @@ function drawPivot() {
 
 function btn(id, cb) {
     document.getElementById(id).onclick = cb;
+}
+
+function checkedval(id) {
+    return document.getElementById(id).checked;
 }
 
 function txtval(id) {
@@ -448,6 +495,7 @@ function update() {
     for (let i = 0; i < floatfields.length; i++) {
         engine[floatfields[i]] = val(floatfields[i]);
     }
+    engine.doubleacting = checkedval('doubleacting');
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.airflowmethod = txtval('airflowmethod');
 
