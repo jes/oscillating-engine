@@ -145,7 +145,7 @@ function draw() {
     for (let i = 0; i < floatfields.length; i++) {
         check(floatfields[i], Math.abs(engine[floatfields[i]] - val(floatfields[i])) < eps);
     }
-    check('inletpressure', engine.inletpressure == val('inletpressure')+engine.atmosphericpressure);
+    check('inletpressure', Math.abs(engine.inletpressure - (val('inletpressure')+engine.atmosphericpressure)) < eps);
     check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
     check('straightports-div', engine.straightports == checkedval('straightports'));
     check('doubleacting-div', engine.doubleacting == checkedval('doubleacting'));
