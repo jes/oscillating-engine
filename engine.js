@@ -21,6 +21,7 @@ function Engine() {
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
     this.airflowmethod = 'tlv'; // tlv/trident1/trident2/bernoulli/linear/billhall
+    this.straightports = true; // can the piston block off the ports?
 
     // double-acting parameters:
     this.doubleacting = false;
@@ -94,9 +95,11 @@ Engine.prototype.step = function(dt) {
     let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
     let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
 
-    // if port is not fully exposed, reduce areas accordingly
-    inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter); // mm^2
-    exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter); // mm^2
+    if (this.straightports) {
+        // if port is not fully exposed, reduce areas accordingly
+        inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter); // mm^2
+        exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter); // mm^2
+    }
     this.inletportarea = inletPortArea;
     this.exhaustportarea = exhaustPortArea;
 
@@ -134,9 +137,11 @@ Engine.prototype.step = function(dt) {
         let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter2/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter2/2); // mm^2
         let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter2/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter2/2); // mm^2
 
-        // if port is not fully exposed, reduce areas accordingly
-        // TODO: inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter2); // mm^2
-        // TODO: exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter2); // mm^2
+        if (this.straightports) {
+            // if port is not fully exposed, reduce areas accordingly
+            // TODO: inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter2); // mm^2
+            // TODO: exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter2); // mm^2
+        }
         this.inletportarea2 = inletPortArea;
         this.exhaustportarea2 = exhaustPortArea;
 

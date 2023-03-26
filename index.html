@@ -6,7 +6,7 @@
 .changed {
     background: #fdd;
 }
-#doubleacting-div {
+.checkbox-div {
     width: 100px;
     display: inline;
 }
@@ -53,6 +53,7 @@ input {
         <option value="wigwag">Wig-Wag</option>
         <option value="stevesworkshop">Steve's Workshop</option>
         <option value="wobler">Wobler</option>
+        <option value="muncasterdouble">Muncaster Double</option>
     </select><br>
     <br>
 
@@ -70,7 +71,8 @@ input {
     <label for="flywheeldiameter">Flywheel diameter:</label> <input type="text" id="flywheeldiameter"> mm<br>
     <label for="flywheelmomentofinertia">Flywheel moment of inertia:</label> <input type="text" id="flywheelmomentofinertia"> kg m<sup>2</sup> <small><a href="flywheel.html" target="_blank">[calculator]</a></small><br>
 
-    <label for="doubleacting">Double-acting?</label> <div id="doubleacting-div"><input type="checkbox" id="doubleacting"></div><br>
+    <label for="straightports">Piston can block ports?</label> <div class="checkbox-div" id="straightports-div"><input type="checkbox" id="straightports"></div> <small>e.g. the cylinder port is drilled straight through</small><br>
+    <label for="doubleacting">Double-acting?</label> <div class="checkbox-div" id="doubleacting-div"><input type="checkbox" id="doubleacting"></div><br>
 
     <div id="doubleacting-params">
     <label for="deadspace2">Gap below piston at BDC:</label> <input type="text" id="deadspace2"> mm<br>
@@ -144,7 +146,7 @@ input {
 
 <i>By <a href="https://incoherency.co.uk/">James Stanley</a>.</i><br>
 <i>Thanks to <a href="http://www.steves-workshop.co.uk/">Steve Bodiley</a> for supplying torque data from his engine.</i><br>
-<i>Thanks to <a href="https://wigwagengine.wixsite.com/wigwag">Ade Swash for the "Wig-Wag" engine</a>, <a href="http://www.steves-workshop.co.uk/steammodels/simpleoscil/simpleoscil.htm">Steve Bodiley for the "Steve's Workshop" engine</a>, and <a href="https://www.modelengineeringwebsite.com/Wobler_oscillator.html">Julius de Waal for the "Wobler" engine</a>.</i><br>
+<i>Thanks to <a href="https://wigwagengine.wixsite.com/wigwag">Ade Swash for the "Wig-Wag" engine</a>, <a href="http://www.steves-workshop.co.uk/steammodels/simpleoscil/simpleoscil.htm">Steve Bodiley for the "Steve's Workshop" engine</a>, and <a href="https://www.modelengineeringwebsite.com/Wobler_oscillator.html">Julius de Waal for the "Wobler" engine</a> and <a href="https://www.modelengineeringwebsite.com/Muncaster_double_oscillator.html">the "Muncaster Double" engine</a>.</i><br>
 <i>Thanks to <a href="https://www.tlv.com/global/UK/calculator/air-flow-rate-through-orifice.html#">TLV</a>, Duncan Webster, Bill Hall, and <a href="https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/">Trident</a> for air flow data and formulae.</i>
 
 <script src="chart.js"></script>

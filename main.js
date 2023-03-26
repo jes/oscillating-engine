@@ -44,6 +44,7 @@ var presets = {
         pivotseparation: 67.5,
         flywheeldiameter: 68,
         flywheelmomentofinertia: "0.000203",
+        straightports: true,
         url: "https://wigwagengine.wixsite.com/wigwag",
     },
 
@@ -61,6 +62,7 @@ var presets = {
         pivotseparation: 35,
         flywheeldiameter: 50,
         flywheelmomentofinertia: "0.0000723",
+        straightports: true,
         url: "http://www.steves-workshop.co.uk/steammodels/simpleoscil/simpleoscil.htm",
     },
 
@@ -78,7 +80,36 @@ var presets = {
         pivotseparation: 45,
         flywheeldiameter: 36,
         flywheelmomentofinertia: "0.0000139",
+        straightports: true,
         url: "https://modelengineeringwebsite.com/Wobler_oscillator.html",
+    },
+
+    muncasterdouble: {
+        stroke: 40,
+        portthrow: 12,
+        deadspace: 2,
+        bore: 24,
+        rodlength: 90,
+        inletportdiameter: 4,
+        exhaustportdiameter: 4,
+        cylinderportdiameter: 4,
+        inletportangle: -18.4,
+        exhaustportangle: 18.4,
+        pivotseparation: 86,
+        flywheeldiameter: 100,
+        flywheelmomentofinertia: "0.000765",
+        straightports: false,
+        doubleacting: true,
+        pistonlength: 8,
+        roddiameter: 5,
+        portthrow2: 12,
+        deadspace2: 2,
+        inletportdiameter2: 4,
+        exhaustportdiameter2: 4,
+        cylinderportdiameter2: 4,
+        inletportangle2: 18.4,
+        exhaustportangle2: -18.4,
+        url: "https://www.modelengineeringwebsite.com/Muncaster_double_oscillator.html",
     },
 };
 
@@ -272,6 +303,7 @@ function draw() {
     }
     check('inletpressure', engine.inletpressure == val('inletpressure')+engine.atmosphericpressure);
     check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
+    check('straightports-div', engine.straightports == checkedval('straightports'));
     check('doubleacting-div', engine.doubleacting == checkedval('doubleacting'));
 
     if (checkedval('doubleacting')) {
@@ -500,6 +532,7 @@ function update() {
     for (let i = 0; i < floatfields.length; i++) {
         engine[floatfields[i]] = val(floatfields[i]);
     }
+    engine.straightports = checkedval('straightports');
     engine.doubleacting = checkedval('doubleacting');
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.airflowmethod = txtval('airflowmethod');
@@ -512,7 +545,12 @@ function update() {
 function loadPreset(p) {
     for (field in presets[p]) {
         let el = document.getElementById(field);
-        if (el) el.value = presets[p][field];
+        if (el) {
+            if (field == 'doubleacting' || field == 'straightports')
+                el.checked = presets[p][field];
+            else
+                el.value = presets[p][field];
+        }
     }
 }
 
