@@ -150,11 +150,11 @@ Engine.prototype.step = function(dt) {
     }
 
     // calculate torque from piston
-    let opposingPressure = (this.doubleacting ? this.cylinderpressure2 : this.atmosphericpressure);
-    // TODO: reduce opposing force because of the rod diameter
-    pistonForce = 1000 * (this.cylinderpressure-opposingPressure) * pistonArea*1e-6; // Newtons
+    let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
+    pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
+    let opposingForce = (this.doubleacting ? (1000 * this.cylinderpressure2 * (pistonArea-rodArea)*1e-6) : this.atmosphericpressure * pistonArea*1e-6); // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
-    crankTorque = pistonForce * (pistonActingDistance * 0.001); // Nm
+    crankTorque = (pistonForce-opposingForce) * (pistonActingDistance * 0.001); // Nm
 
     // calculate flywheel angular velocity with piston torque
     let angularacceleration = (crankTorque - this.load) / this.flywheelmomentofinertia; // rad/s^2
