@@ -46,6 +46,16 @@ function plotPressureCurve(pts) {
     pressureCurveChart.update();
 }
 
+function setLoad(l) {
+    engine.load = l;
+    document.getElementById('load').value = Math.round(l*10000000)/10000000;
+}
+
+function setPressure(p) {
+    engine.inletpressure = p;
+    document.getElementById('inletpressure').value = Math.round((p-engine.atmosphericpressure)*10000000)/10000000;
+}
+
 function setupPlots() {
     let ctx = document.getElementById('chartcanvas');
     let ctx2 = document.getElementById('chartcanvas2');
@@ -231,7 +241,7 @@ function setupPlots() {
     });
     btn('plotpressurecurve', function() {
         let before = engine.inletpressure;
-        engine.inletpressure = val('maxpressure') + engine.atmosphericpressure;
+        setPressure(val('maxpressure') + engine.atmosphericpressure);
         engine.reset();
         pvdiagram.clear();
         timingdiagram.clear();
@@ -244,12 +254,12 @@ function setupPlots() {
             plotPressureCurve(datapoints);
             txt('pressurestatus', 'Plotting...');
 
-            engine.inletpressure = engine.inletpressure - val('pressurestep');
+            setPressure(engine.inletpressure - val('pressurestep'));
         };
         engine.onstalled = function() {
             txt('pressurestatus', 'Finished.');
 
-            engine.inletpressure = before;
+            setPressure(before);
 
             engine.reset();
             pvdiagram.clear();

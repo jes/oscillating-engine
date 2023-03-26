@@ -292,11 +292,6 @@ function loadPreset(p) {
     }
 }
 
-function setLoad(l) {
-    engine.load = l;
-    document.getElementById('load').value = Math.round(l*10000000)/10000000;
-}
-
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
