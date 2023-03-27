@@ -215,19 +215,19 @@ function draw() {
     translate(engine_centre_px*2,0); // offset to clear the engine
     pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120), engine.doubleacting); // draw inside the rest of the canvas
 
-    txt('rpm', round(engine.rpm, 2));
-    txt('pressure', round(engine.cylinderpressure-engine.atmosphericpressure, 2));
-    txt('pressure2', round(engine.cylinderpressure2-engine.atmosphericpressure, 2));
-    txt('torque', round(engine.torque, 5));
-    txt('meanrpm', round(engine.meanrpm, 2));
-    txt('power', round(engine.power, 3));
-    txt('horsepower', round(engine.power/746, 5));
-    txt('cc', round(PI * (engine.bore/20)*(engine.bore/20) * (engine.stroke/10), 2));
-    txt('cc2', round(PI * ((engine.bore/20)*(engine.bore/20) - (engine.roddiameter/20)*(engine.roddiameter/20)) * (engine.stroke/10), 2));
-    txt('rawefficiency', round(engine.rawefficiency*100, 2));
-    txt('efficiency', round(engine.efficiency*100, 2));
+    txt('rpm', sigfigs(engine.rpm, 4));
+    txt('pressure', sigfigs(engine.cylinderpressure-engine.atmosphericpressure, 4));
+    txt('pressure2', sigfigs(engine.cylinderpressure2-engine.atmosphericpressure, 4));
+    txt('torque', sigfigs(engine.torque, 4));
+    txt('meanrpm', sigfigs(engine.meanrpm, 4));
+    txt('power', sigfigs(engine.power, 4));
+    txt('horsepower', sigfigs(engine.power/746, 3));
+    txt('cc', sigfigs(PI * (engine.bore/20)*(engine.bore/20) * (engine.stroke/10), 4));
+    txt('cc2', sigfigs(PI * ((engine.bore/20)*(engine.bore/20) - (engine.roddiameter/20)*(engine.roddiameter/20)) * (engine.stroke/10), 4));
+    txt('rawefficiency', sigfigs(engine.rawefficiency*100, 3));
+    txt('efficiency', sigfigs(engine.efficiency*100, 3));
     let secs_per_rev = 60 / engine.meanrpm;
-    txt('airconsumption', round(engine.airmass / secs_per_rev, 5));
+    txt('airconsumption', sigfigs(engine.airmass / secs_per_rev, 3));
 }
 
 function btn(id, cb) {
@@ -248,10 +248,6 @@ function val(id) {
 
 function txt(id, val) {
     document.getElementById(id).innerText = val;
-}
-
-function round(num, places) {
-    return Math.round(num * Math.pow(10,places))/Math.pow(10,places);
 }
 
 function check(id, ok) {
