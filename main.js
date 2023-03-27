@@ -226,6 +226,8 @@ function draw() {
     txt('cc2', round(PI * ((engine.bore/20)*(engine.bore/20) - (engine.roddiameter/20)*(engine.roddiameter/20)) * (engine.stroke/10), 2));
     txt('rawefficiency', round(engine.rawefficiency*100, 2));
     txt('efficiency', round(engine.efficiency*100, 2));
+    let secs_per_rev = 60 / engine.meanrpm;
+    txt('airconsumption', round(engine.airmass / secs_per_rev, 5));
 }
 
 function btn(id, cb) {
