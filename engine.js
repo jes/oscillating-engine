@@ -247,8 +247,9 @@ Engine.prototype.computeCylinderPosition = function() {
 
     if (this.doubleacting) {
         // find height of piston from bottom of cylinder
-        this.pistonheight2 = this.deadspace2 + this.pivotseparation - dist + this.pistonlength + this.stroke/2;
-        this.cylindervolume2 = this.pistonheight2 * pistonArea; // mm^3
+        this.pistonheight2 = this.deadspace2 + this.stroke/2 + this.pivotseparation - dist;
+        let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
+        this.cylindervolume2 = this.pistonheight2 * (pistonArea - rodArea); // mm^3
     }
 };
 
