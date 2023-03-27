@@ -269,6 +269,8 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     // is the air flowing the correct way?
     if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
 
+    if (pressure1 == pressure2) return 0;
+
     if (this.airflowmethod == 'trident1') {
         // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
         let pressureDifference = pressure1 - pressure2;

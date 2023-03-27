@@ -99,28 +99,18 @@ var presets = {
         doubleacting: true,
         pistonlength: 8,
         roddiameter: 5,
-        portthrow2: 12,
-        deadspace2: 2,
-        inletportdiameter2: 4,
-        exhaustportdiameter2: 4,
-        cylinderportdiameter2: 4,
-        inletportangle2: 18.4,
-        exhaustportangle2: -18.4,
+        symmetrical: true,
         url: "https://www.modelengineeringwebsite.com/Muncaster_double_oscillator.html",
     },
 };
 
-let double_acting_params = ['deadspace', 'portthrow', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle'];
 for (let engine in presets) {
     if (!presets[engine].doubleacting) {
         presets[engine].doubleacting = false;
+        presets[engine].deadspace2 = presets[engine].deadspace;
         presets[engine].pistonlength = 5;
         presets[engine].roddiameter = 2;
-        for (let param of double_acting_params) {
-            presets[engine][param + "2"] = presets[engine][param];
-        }
-        presets[engine].inletportangle2 = -presets[engine].inletportangle2;
-        presets[engine].exhaustportangle2 = -presets[engine].exhaustportangle2;
+        presets[engine].symmetrical = true;
     }
 }
 
@@ -154,6 +144,12 @@ function draw() {
         document.getElementById('doubleacting-params').style.display = 'block';
     } else {
         document.getElementById('doubleacting-params').style.display = 'none';
+    }
+
+    if (checkedval('symmetrical')) {
+        document.getElementById('2ndport-params').style.display = 'none';
+    } else {
+        document.getElementById('2ndport-params').style.display = 'block';
     }
 
     if (engine.doubleacting) {
@@ -274,6 +270,19 @@ function update() {
     engine.inletpressure = val('inletpressure')+engine.atmosphericpressure;
     engine.airflowmethod = txtval('airflowmethod');
 
+    if (checkedval('symmetrical')) {
+        let port_params = ['portthrow', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle'];
+        for (let field of port_params) {
+            engine[field + "2"] = engine[field];
+        }
+        engine.inletportangle2 = -engine.inletportangle2;
+        engine.exhaustportangle2 = -engine.exhaustportangle2;
+        for (let field of port_params) {
+            console.log(field);
+            document.getElementById(field+"2").value = engine[field+"2"];
+        }
+    }
+
     let totalheight_mm = engine.flywheeldiameter/2 + engine.stroke/2 + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
@@ -283,7 +292,7 @@ function loadPreset(p) {
     for (field in presets[p]) {
         let el = document.getElementById(field);
         if (el) {
-            if (field == 'doubleacting' || field == 'straightports')
+            if (field == 'doubleacting' || field == 'straightports' || field == 'symmetrical')
                 el.checked = presets[p][field];
             else
                 el.value = presets[p][field];
