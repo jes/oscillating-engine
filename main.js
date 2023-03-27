@@ -278,7 +278,6 @@ function update() {
         engine.inletportangle2 = -engine.inletportangle2;
         engine.exhaustportangle2 = -engine.exhaustportangle2;
         for (let field of port_params) {
-            console.log(field);
             document.getElementById(field+"2").value = engine[field+"2"];
         }
     }
