@@ -5,8 +5,8 @@ function PVDiagram(npoints) {
     this.atmosphericpressure = 0;
 }
 
-PVDiagram.prototype.add = function(p,v) {
-    this.points.push([p,v]);
+PVDiagram.prototype.add = function(p1,v1,p2,v2) {
+    this.points.push([p1,v1,p2,v2]);
     while (this.points.length > this.npoints)
         this.points.shift();
 };
@@ -15,7 +15,7 @@ PVDiagram.prototype.clear = function() {
     this.points = [];
 };
 
-PVDiagram.prototype.draw = function(w,h,plotPoint) {
+PVDiagram.prototype.draw = function(w,h,plotPoint,plotSecondary) {
     if (this.points.length == 0) return;
 
     let minp = this.atmosphericpressure;
@@ -23,11 +23,15 @@ PVDiagram.prototype.draw = function(w,h,plotPoint) {
     let maxp = this.inletpressure;
     let maxv = 0;
 
+    let plots = plotSecondary ? [0,2] : [0];
+
     for (let i = 0; i < this.points.length; i++) {
-        if (this.points[i][0] < minp) minp = this.points[i][0];
-        if (this.points[i][1] < minv) minv = this.points[i][1];
-        if (this.points[i][0] > maxp) maxp = this.points[i][0];
-        if (this.points[i][1] > maxv) maxv = this.points[i][1];
+        for (let j of plots) {
+            if (this.points[i][j+0] < minp) minp = this.points[i][j+0];
+            if (this.points[i][j+1] < minv) minv = this.points[i][j+1];
+            if (this.points[i][j+0] > maxp) maxp = this.points[i][j+0];
+            if (this.points[i][j+1] > maxv) maxv = this.points[i][j+1];
+        }
     }
 
     w -= 20;
@@ -41,12 +45,14 @@ PVDiagram.prototype.draw = function(w,h,plotPoint) {
     line(10,10+h-inlet_h,10+w,10+h-inlet_h);
 
     for (let i = 1; i < this.points.length; i++) {
-        let p0 = (this.points[i-1][0]-minp)*(h/(maxp-minp));
-        let v0 = (this.points[i-1][1]-minv)*(w/(maxv-minv));
-        let p1 = (this.points[i][0]-minp)*(h/(maxp-minp));
-        let v1 = (this.points[i][1]-minv)*(w/(maxv-minv));
-        stroke(200 - ((i*i)/(this.points.length*this.points.length))*200);
-        line(10+v0,10+h-p0, 10+v1,10+h-p1);
+        for (let j of plots) {
+            let p0 = (this.points[i-1][j+0]-minp)*(h/(maxp-minp));
+            let v0 = (this.points[i-1][j+1]-minv)*(w/(maxv-minv));
+            let p1 = (this.points[i][j+0]-minp)*(h/(maxp-minp));
+            let v1 = (this.points[i][j+1]-minv)*(w/(maxv-minv));
+            stroke(200 - ((i*i)/(this.points.length*this.points.length))*200);
+            line(10+v0,10+h-p0, 10+v1,10+h-p1);
+        }
     }
 
     if (plotPoint) {
