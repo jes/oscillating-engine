@@ -157,7 +157,7 @@ Engine.prototype.step = function(dt) {
     // calculate torque from piston
     let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
     pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
-    let opposingForce = 1000 * (this.doubleacting ? (this.cylinderpressure2 * (pistonArea-rodArea)*1e-6) : (this.atmosphericpressure * pistonArea*1e-6)); // Newtons
+    let opposingForce = 1000 * (this.doubleacting ? (this.cylinderpressure2 * (pistonArea-rodArea)*1e-6 + this.atmosphericpressure*rodArea*1e-6) : (this.atmosphericpressure * pistonArea*1e-6)); // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = (pistonForce-opposingForce) * (pistonActingDistance * 0.001); // Nm
 
