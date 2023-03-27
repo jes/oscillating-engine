@@ -77,12 +77,12 @@ Engine.prototype.step = function(dt) {
     let currentAirMass = this.computeMass(this.cylinderpressure, this.cylindervolume); // kg
 
     // compute the effective port locations
-    let inletPortX = sin(this.inletportangle * Math.PI/180) * this.portthrow;
-    let inletPortY = cos(this.inletportangle * Math.PI/180) * this.portthrow;
-    let exhaustPortX = sin(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    let exhaustPortY = cos(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    let cylinderPortX = sin(this.cylinderangle * Math.PI/180) * this.portthrow;
-    let cylinderPortY = cos(this.cylinderangle * Math.PI/180) * this.portthrow;
+    let inletPortX = Math.sin(this.inletportangle * Math.PI/180) * this.portthrow;
+    let inletPortY = Math.cos(this.inletportangle * Math.PI/180) * this.portthrow;
+    let exhaustPortX = Math.sin(this.exhaustportangle * Math.PI/180) * this.portthrow;
+    let exhaustPortY = Math.cos(this.exhaustportangle * Math.PI/180) * this.portthrow;
+    let cylinderPortX = Math.sin(this.cylinderangle * Math.PI/180) * this.portthrow;
+    let cylinderPortY = Math.cos(this.cylinderangle * Math.PI/180) * this.portthrow;
 
     this.inletportx = inletPortX;
     this.inletporty = inletPortY;
@@ -119,12 +119,12 @@ Engine.prototype.step = function(dt) {
     if (this.doubleacting) {
         currentAirMass2 = this.computeMass(this.cylinderpressure2, this.cylindervolume2); // kg
 
-        let inletPortX = sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        let inletPortY = cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        let exhaustPortX = sin((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        let exhaustPortY = cos((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        let cylinderPortX = sin((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
-        let cylinderPortY = cos((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
+        let inletPortX = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
+        let inletPortY = Math.cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
+        let exhaustPortX = Math.sin((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
+        let exhaustPortY = Math.cos((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
+        let cylinderPortX = Math.sin((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
+        let cylinderPortY = Math.cos((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
 
         this.inletportx2 = inletPortX;
         this.inletporty2 = inletPortY;
@@ -229,13 +229,13 @@ Engine.prototype.step = function(dt) {
 
 Engine.prototype.computeCylinderPosition = function() {
     // 1. find position of crank pin relative to crank centre
-    this.crankpinx = Math.sin(this.crankposition * PI/180) * this.stroke/2;
-    this.crankpiny = Math.cos(this.crankposition * PI/180) * this.stroke/2;
+    this.crankpinx = Math.sin(this.crankposition * Math.PI/180) * this.stroke/2;
+    this.crankpiny = Math.cos(this.crankposition * Math.PI/180) * this.stroke/2;
 
     // 2. find angle from crank pin to cylinder pivot
     let dx = this.crankpinx;
     let dy = this.pivotseparation - this.crankpiny;
-    this.cylinderangle = Math.atan2(dy, dx) * 180/PI - 90;
+    this.cylinderangle = Math.atan2(dy, dx) * 180/Math.PI - 90;
 
     // 3. find height of piston from top of cylinder
     let dist = Math.sqrt(dx*dx + dy*dy); // distance from crank pin to oscillation pivot
@@ -395,3 +395,5 @@ function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
   var area2 = 0.5*phi*rr0 - 0.5*rr0*Math.sin(phi);
   return area1 + area2;
 }
+
+module.exports = { Engine };
