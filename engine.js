@@ -72,55 +72,18 @@ Engine.prototype.reset = function() {
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
 
-    // compute the effective port locations
-    this.inletportx = Math.sin(this.inletportangle * Math.PI/180) * this.portthrow;
-    this.inletporty = Math.cos(this.inletportangle * Math.PI/180) * this.portthrow;
-    this.exhaustportx = Math.sin(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    this.exhaustporty = Math.cos(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    this.cylinderportx = Math.sin(this.cylinderangle * Math.PI/180) * this.portthrow;
-    this.cylinderporty = Math.cos(this.cylinderangle * Math.PI/180) * this.portthrow;
-
-    // compute port overlap areas
-    this.inletportarea = areaOfIntersection(this.inletportx, this.inletporty, this.inletportdiameter/2, this.cylinderportx, this.cylinderporty, this.cylinderportdiameter/2); // mm^2
-    this.exhaustportarea= areaOfIntersection(this.exhaustportx, this.exhaustporty, this.exhaustportdiameter/2, this.cylinderportx, this.cylinderporty, this.cylinderportdiameter/2); // mm^2
-
-    if (this.straightports) {
-        // if port is not fully exposed, reduce areas accordingly
-        this.inletportarea = this.reducedPortArea(this.inletportarea, this.cylinderportdiameter); // mm^2
-        this.exhaustportarea = this.reducedPortArea(this.exhaustportarea, this.cylinderportdiameter); // mm^2
-    }
-
-    // let air through ports
-    let inletAirMass = this.volumes[0].getClampedFlow(this.airflowmethod, this.inletpressure, this.inletportarea, dt); // kg
-    let exhaustAirMass = -this.volumes[0].getClampedFlow(this.airflowmethod, this.atmosphericpressure, this.exhaustportarea, dt); // kg
+    // compute the flow through the ports
+    let inletAirMass = this.flow(this.inletportangle, this.inletportdiameter, this.inletpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
+    let exhaustAirMass = -this.flow(this.exhaustportangle, this.exhaustportdiameter, this.atmosphericpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
 
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
-    // TODO: refactor, so that we're generic about the number of volumes
     if (this.doubleacting) {
-        this.inletportx2 = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        this.inletporty2 = Math.cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        this.exhaustportx2 = Math.sin((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        this.exhaustporty2 = Math.cos((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        this.cylinderportx2 = Math.sin((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
-        this.cylinderporty2 = Math.cos((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
-
-        // compute port overlap areas
-        this.inletportarea2 = areaOfIntersection(this.inletportx2, this.inletporty2, this.inletportdiameter2/2, this.cylinderportx2, this.cylinderporty2, this.cylinderportdiameter2/2); // mm^2
-        this.exhaustportarea2 = areaOfIntersection(this.exhaustportx2, this.exhaustporty2, this.exhaustportdiameter2/2, this.cylinderportx2, this.cylinderporty2, this.cylinderportdiameter2/2); // mm^2
-
-        if (this.straightports) {
-            // if port is not fully exposed, reduce areas accordingly
-            // TODO: this.inletportarea2 = this.reducedPortArea(this.inletportarea2, this.cylinderportdiameter2); // mm^2
-            // TODO: this.exhaustportarea2 = this.reducedPortArea(this.exhaustportarea2, this.cylinderportdiameter2); // mm^2
-        }
-
-        // let air through ports
-        let inletAirMass = this.volumes[1].getClampedFlow(this.airflowmethod, this.inletpressure, this.inletportarea2, dt); // kg
-        let exhaustAirMass = -this.volumes[1].getClampedFlow(this.airflowmethod, this.atmosphericpressure, this.exhaustportarea2, dt); // kg
+        let inletAirMass = this.flow(this.inletportangle2+180, this.inletportdiameter2, this.inletpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
+        let exhaustAirMass = -this.flow(this.exhaustportangle2+180, this.exhaustportdiameter2, this.atmosphericpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
@@ -215,6 +178,25 @@ Engine.prototype.computeCylinderPosition = function() {
     this.pistonheight2 = this.deadspace2 + this.stroke/2 + this.pivotseparation - dist;
     let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
     this.volumes[1].setVolume(this.pistonheight2 * (pistonArea - rodArea)); // mm^3
+};
+
+// return the mass of air flowing through the given port, connected to the given pressure, into or out of the given volume
+Engine.prototype.flow = function(portangle, portdiameter, pressure, cylinderangle, cylinderportdiameter, portthrow, vol, dt) {
+    let portx = Math.sin(portangle * Math.PI/180) * portthrow;
+    let porty = Math.cos(portangle * Math.PI/180) * portthrow;
+    let cylinderportx = Math.sin(cylinderangle * Math.PI/180) * portthrow;
+    let cylinderporty = Math.cos(cylinderangle * Math.PI/180) * portthrow;
+
+    // compute port overlap areas
+    let portarea = areaOfIntersection(portx, porty, portdiameter/2, cylinderportx, cylinderporty, cylinderportdiameter/2); // mm^2
+
+    if (this.straightports) {
+        // if port is not fully exposed, reduce areas accordingly
+        portarea = this.reducedPortArea(portarea, cylinderportdiameter); // mm^2
+    }
+
+    // let air through ports
+    return this.volumes[vol].getClampedFlow(this.airflowmethod, pressure, portarea, dt); // kg
 };
 
 Engine.prototype.reducedPortArea = function(area, d) {
