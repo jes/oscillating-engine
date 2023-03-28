@@ -237,19 +237,6 @@ Engine.prototype.computeCylinderPosition = function() {
     this.volumes[1].setVolume(this.pistonheight2 * (pistonArea - rodArea)); // mm^3
 };
 
-// return the pressure (kPa) of a given mass (kg) of air in a given volume (mm^3)
-// TODO: delete, move to AirVolume
-Engine.prototype.computePressure = function(mass, volume) {
-    let pressureRatio = mass / (volume*1e-9 * this.airdensity);
-    return pressureRatio * this.atmosphericpressure;
-};
-
-// return the mass (kg) of a given pressure (kPa) of air in a given volume (mm^3)
-// TODO: delete, move to AirVolume
-Engine.prototype.computeMass = function(pressure, volume) {
-    return (pressure/this.atmosphericpressure) * (volume*1e-9) * this.airdensity;
-}
-
 Engine.prototype.reducedPortArea = function(area, d) {
     let totalheight = this.stroke/2 + this.rodlength + this.deadspace;
     let portheight = totalheight - (this.pivotseparation + this.portthrow); // mm - height of port centres from top of cylinder
