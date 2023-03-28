@@ -14,6 +14,8 @@ TimingDiagram.prototype.index2angle = function(index) {
 };
 
 TimingDiagram.prototype.add = function(angle, inlet, exhaust) {
+    if (isNaN(angle)) return;
+
     angle %= 360.0;
     if (angle < 0) angle += 360.0;
 
