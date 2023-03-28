@@ -103,10 +103,11 @@ Engine.prototype.step = function(dt) {
     let inletAirMass = this.volumes[0].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
     let exhaustAirMass = -this.volumes[0].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
 
+    this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
+    this.sumairmass += inletAirMass;
+
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
-    let inletAirMass2;
-    let exhaustAirMass2;
     // TODO: refactor, so that we're generic about the number of volumes
     if (this.doubleacting) {
         let inletPortX = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
@@ -136,8 +137,11 @@ Engine.prototype.step = function(dt) {
         this.exhaustportarea2 = exhaustPortArea;
 
         // let air through ports
-        inletAirMass2 = this.volumes[1].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
-        exhaustAirMass2 = -this.volumes[1].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
+        let inletAirMass = this.volumes[1].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
+        let exhaustAirMass = -this.volumes[1].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
+
+        this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
+        this.sumairmass += inletAirMass;
     }
 
     // calculate torque from piston
@@ -168,7 +172,6 @@ Engine.prototype.step = function(dt) {
     this.sumtorque += crankTorque - lossTorque;
     this.torquepoints++;
     this.sumrpm += this.rpm;
-    this.sumairmass += inletAirMass + (this.doubleacting ? inletAirMass2 : 0);
 
     // engine stalled/reversed if the product of new and old rpm is <= 0
     let wasstalled = this.stalled;
@@ -199,11 +202,6 @@ Engine.prototype.step = function(dt) {
     if (this.crankposition < 0) this.crankposition += 360.0;
 
     this.computeCylinderPosition();
-
-    // calculate updated cylinder pressure
-    this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
-    if (this.doubleacting)
-        this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass2 - exhaustAirMass2);
 
     // calculate updated efficiency
     let energy = this.power / (this.meanrpm/ 60);
