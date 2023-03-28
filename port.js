@@ -58,15 +58,9 @@ Port.prototype.reducedFlow = function(port, pistonheight, above, method, dt) {
         } else if (pistonheight < -(port.swingradius-port.diameter/2)) {
             // port is partially covered up
             let start = -(port.swingradius-port.diameter/2);
-            this.overlaparea *= -(pistonheight-start)/port.diameter;
+            this.overlaparea *= 1 - (-(pistonheight-start)/port.diameter);
         }
     }
-
-    // TODO: how do we allow the piston to block the ports?
-    //if (this.straightports) {
-        // if port is not fully exposed, reduce areas accordingly
-        //portarea = this.reducedPortArea(portarea, cylinderportdiameter); // mm^2
-    //}
 
     return this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
 };

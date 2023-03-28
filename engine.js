@@ -101,8 +101,14 @@ Engine.prototype.step = function(dt) {
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
     if (this.doubleacting) {
-        let inletAirMass = -this.inletport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
-        let exhaustAirMass = this.exhaustport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
+        let inletAirMass; let exhaustAirMass;
+        if (this.straightports) {
+            inletAirMass = -this.inletport2.reducedFlow(this.cylinderport2, piston_height_above_pivot-this.pistonlength, false, this.airflowmethod, dt); // kg
+            exhaustAirMass = this.exhaustport2.reducedFlow(this.cylinderport2, piston_height_above_pivot-this.pistonlength, false, this.airflowmethod, dt); // kg
+        } else {
+            inletAirMass = -this.inletport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
+            exhaustAirMass = this.exhaustport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
+        }
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
