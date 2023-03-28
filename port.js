@@ -12,6 +12,12 @@ function Port(angle, swingradius, diameter, volume) {
     this.update();
 };
 
+// update the angle
+Port.prototype.setAngle = function(a) {
+    this.angle = a;
+    this.update();
+};
+
 // update this.x, this.y
 Port.prototype.update = function() {
     this.x = Math.sin(this.angle * Math.PI/180) * this.swingradius;

@@ -48,6 +48,7 @@ Engine.prototype.reset = function() {
     this.volumes[1].setPressure(this.inletpressure);
     this.crankposition = 0;
     this.rpm = 200;
+    this.makePorts();
     this.computeCylinderPosition();
 
     this.sumrawtorque = 0;
@@ -69,12 +70,22 @@ Engine.prototype.reset = function() {
     this.onstalled = null;
 };
 
+Engine.prototype.makePorts = function() {
+    this.inletport = new Port(this.inletportangle, this.portthrow, this.inletportdiameter, new AirVolume(this.inletpressure));
+    this.exhaustport = new Port(this.exhaustportangle, this.portthrow, this.exhaustportdiameter, new AirVolume(this.atmosphericpressure));
+    this.cylinderport = new Port(this.cylinderangle, this.portthrow, this.cylinderportdiameter, this.volumes[0]);
+
+    this.inletport2 = new Port(180+this.inletportangle2, this.portthrow2, this.inletportdiameter2, new AirVolume(this.inletpressure));
+    this.exhaustport2 = new Port(180+this.exhaustportangle2, this.portthrow2, this.exhaustportdiameter2, new AirVolume(this.atmosphericpressure));
+    this.cylinderport2 = new Port(180+this.cylinderangle, this.portthrow2, this.cylinderportdiameter2, this.volumes[1]);
+};
+
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
 
     // compute the flow through the ports
-    let inletAirMass = this.portFlow(this.inletportangle, this.inletportdiameter, this.inletpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
-    let exhaustAirMass = -this.portFlow(this.exhaustportangle, this.exhaustportdiameter, this.atmosphericpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
+    let inletAirMass = this.cylinderport.flow(this.inletport, this.airflowmethod, dt); // kg
+    let exhaustAirMass = -this.cylinderport.flow(this.exhaustport, this.airflowmethod, dt); // kg
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
@@ -82,8 +93,8 @@ Engine.prototype.step = function(dt) {
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
     if (this.doubleacting) {
-        let inletAirMass = this.portFlow(this.inletportangle2+180, this.inletportdiameter2, this.inletpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
-        let exhaustAirMass = -this.portFlow(this.exhaustportangle2+180, this.exhaustportdiameter2, this.atmosphericpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
+        let inletAirMass = this.cylinderport2.flow(this.inletport2, this.airflowmethod, dt); // kg
+        let exhaustAirMass = -this.cylinderport2.flow(this.exhaustport2, this.airflowmethod, dt); // kg
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
@@ -178,13 +189,10 @@ Engine.prototype.computeCylinderPosition = function() {
     this.pistonheight2 = this.deadspace2 + this.stroke/2 + this.pivotseparation - dist;
     let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
     this.volumes[1].setVolume(this.pistonheight2 * (pistonArea - rodArea)); // mm^3
-};
 
-// return the mass of air flowing through the given port, connected to the given pressure, into or out of the given volume
-Engine.prototype.portFlow = function(portangle, portdiameter, pressure, cylinderangle, cylinderportdiameter, portthrow, vol, dt) {
-    let port1 = new Port(portangle, portthrow, portdiameter, this.volumes[vol]);
-    let port2 = new Port(cylinderangle, portthrow, cylinderportdiameter, new AirVolume(pressure));
-    return port1.flow(port2, this.airflowmethod, dt);
+    // update port locations
+    this.cylinderport.setAngle(this.cylinderangle);
+    this.cylinderport2.setAngle(180+this.cylinderangle);
 };
 
 Engine.prototype.reducedPortArea = function(area, d) {

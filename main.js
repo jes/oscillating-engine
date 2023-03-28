@@ -280,6 +280,8 @@ function update() {
         }
     }
 
+    engine.makePorts();
+
     let totalheight_mm = engine.flywheeldiameter/2 + engine.stroke/2 + engine.rodlength + engine.deadspace; // mm
     let availableheight_px = canvas.height - 2*canvasmargin;
     px_per_mm = availableheight_px / totalheight_mm;
