@@ -185,7 +185,7 @@ function draw() {
                 pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
             }
-            timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
+            timingdiagram.add(engine.crankposition, engine.inletport.overlaparea, engine.exhaustport.overlaparea);
             // TODO: how to draw secondary timing diagram?
             if ((new Date()) - start > maxRuntime) {
                 txt('tooslow', '(!)');

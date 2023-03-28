@@ -84,8 +84,8 @@ Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
 
     // compute the flow through the ports
-    let inletAirMass = this.cylinderport.flow(this.inletport, this.airflowmethod, dt); // kg
-    let exhaustAirMass = -this.cylinderport.flow(this.exhaustport, this.airflowmethod, dt); // kg
+    let inletAirMass = -this.inletport.flow(this.cylinderport, this.airflowmethod, dt); // kg
+    let exhaustAirMass = this.exhaustport.flow(this.cylinderport, this.airflowmethod, dt); // kg
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
@@ -93,8 +93,8 @@ Engine.prototype.step = function(dt) {
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
     if (this.doubleacting) {
-        let inletAirMass = this.cylinderport2.flow(this.inletport2, this.airflowmethod, dt); // kg
-        let exhaustAirMass = -this.cylinderport2.flow(this.exhaustport2, this.airflowmethod, dt); // kg
+        let inletAirMass = -this.inletport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
+        let exhaustAirMass = this.exhaustport2.flow(this.cylinderport2, this.airflowmethod, dt); // kg
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
@@ -214,24 +214,6 @@ Engine.prototype.reducedPortArea = function(area, d) {
         return area;
     }
 };
-
-// https://math.stackexchange.com/a/290526
-function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
-  if (r0 > r1) [r0,r1] = [r1,r0]; // without loss of generality, r0 is smaller
-  var rr0 = r0*r0;
-  var rr1 = r1*r1;
-  var c = Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
-  if (c >= r0+r1) return 0; // no overlap: return 0 area
-  if (c+r0 <= r1) {
-      // full overlap: return area of smallest circle
-      return Math.PI*rr0;
-  }
-  var phi = (Math.acos((rr0+(c*c)-rr1) / (2*r0*c)))*2;
-  var theta = (Math.acos((rr1+(c*c)-rr0) / (2*r1*c)))*2;
-  var area1 = 0.5*theta*rr1 - 0.5*rr1*Math.sin(theta);
-  var area2 = 0.5*phi*rr0 - 0.5*rr0*Math.sin(phi);
-  return area1 + area2;
-}
 
 if (window.module !== undefined)
     module.exports = { Engine };

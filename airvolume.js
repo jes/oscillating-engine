@@ -200,14 +200,19 @@ AirVolume.prototype.getFlowRate = function(method, pressure, area) {
     return airFlowRate(method, pressure, this.getPressure(), area);
 };
 
-// return the mass flowed (kg) in to this volume, from a volume of the given pressure (kPa),
+// return the mass flowed (kg) in to this volume, from the other given airvolume,
 // through an orifice of the given cross-sectional area (mm^2), over the given
 // duration (dt, seconds), but clamped so that the resulting pressure does not exceed the
 // supply pressure (e.g. if the timestep is too large)
 // using the given method (tlv/trident1/trident2/bernoulli/linear/billhall)
-AirVolume.prototype.getClampedFlow = function(method, pressure, area, dt) {
-    let flow = this.getFlowRate(method, pressure, area) * dt;
-    return clampAirFlow(flow, pressure, this.getPressure(), this.getVolume());
+AirVolume.prototype.getClampedFlow = function(method, airvolume, area, dt) {
+    let flow = this.getFlowRate(method, airvolume.getPressure(), area) * dt;
+    if (!this.is_infinite)
+        flow = clampAirFlow(flow, airvolume.getPressure(), this.getPressure(), this.getVolume());
+    if (!airvolume.is_infinite)
+        flow = -clampAirFlow(-flow, this.getPressure(), airvolume.getPressure(), airvolume.getVolume());
+
+    return flow;
 };
 
 if (window.module !== undefined)

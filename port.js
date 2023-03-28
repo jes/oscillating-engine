@@ -1,9 +1,9 @@
-// "volume" should be an AirVolume
-function Port(angle, swingradius, diameter, volume) {
+// "airvolume" should be an AirVolume
+function Port(angle, swingradius, diameter, airvolume) {
     this.angle = angle;
     this.swingradius = swingradius;
     this.diameter = diameter;
-    this.volume = volume;
+    this.airvolume = airvolume;
 
     this.overlaparea = 0;
     this.x = 0;
@@ -37,8 +37,26 @@ Port.prototype.flow = function(port, method, dt) {
         //portarea = this.reducedPortArea(portarea, cylinderportdiameter); // mm^2
     //}
 
-    return this.volume.getClampedFlow(method, port.volume.getPressure(), this.overlaparea, dt); // kg
+    return this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
 };
+
+// https://math.stackexchange.com/a/290526
+function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
+  if (r0 > r1) [r0,r1] = [r1,r0]; // without loss of generality, r0 is smaller
+  var rr0 = r0*r0;
+  var rr1 = r1*r1;
+  var c = Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+  if (c >= r0+r1) return 0; // no overlap: return 0 area
+  if (c+r0 <= r1) {
+      // full overlap: return area of smallest circle
+      return Math.PI*rr0;
+  }
+  var phi = (Math.acos((rr0+(c*c)-rr1) / (2*r0*c)))*2;
+  var theta = (Math.acos((rr1+(c*c)-rr0) / (2*r1*c)))*2;
+  var area1 = 0.5*theta*rr1 - 0.5*rr1*Math.sin(theta);
+  var area2 = 0.5*phi*rr0 - 0.5*rr0*Math.sin(phi);
+  return area1 + area2;
+}
 
 if (window.module !== undefined)
     module.exports = { Engine };
