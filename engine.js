@@ -101,12 +101,10 @@ Engine.prototype.step = function(dt) {
     this.exhaustportarea = exhaustPortArea;
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
-    let inletAirMass = this.airFlow(this.inletpressure, this.volumes[0].getPressure(), inletPortArea) * dt; // kg
-    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.volumes[0].getPressure(), this.volumes[0].getVolume()); // kg
+    let inletAirMass = this.volumes[0].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
-    let exhaustAirMass = this.airFlow(this.volumes[0].getPressure(), this.atmosphericpressure, exhaustPortArea) * dt; // kg
-    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.volumes[0].getPressure(), this.volumes[0].getVolume()); // kg
+    let exhaustAirMass = -this.volumes[0].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
 
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
@@ -263,102 +261,6 @@ Engine.prototype.computePressure = function(mass, volume) {
 Engine.prototype.computeMass = function(pressure, volume) {
     return (pressure/this.atmosphericpressure) * (volume*1e-9) * this.airdensity;
 }
-
-// return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
-// TODO: move to AirVolume?
-Engine.prototype.airFlow = function(pressure1, pressure2, area) {
-    // is the air flowing the correct way?
-    if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
-
-    if (pressure1 == pressure2) return 0;
-
-    if (this.airflowmethod == 'trident1') {
-        // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
-        let pressureDifference = pressure1 - pressure2;
-        let kg_per_sec_mm2_kpa = 0.000035/Math.pow(pressureDifference,0.73)+0.00000154;
-        let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
-        return massFlow;
-    } else if (this.airflowmethod == 'trident2') {
-        // derived from https://trident.on.ca/engineering-information/airvacuum-flow-orifice-table/
-        let pressureDifference = pressure1 - pressure2;
-        let kg_per_sec_mm2_kpa = 0.0000315/Math.pow(pressureDifference,0.71)+0.00000155;
-        let massFlow = kg_per_sec_mm2_kpa * area * pressureDifference;
-        return massFlow;
-    } else if (this.airflowmethod == 'bernoulli') {
-        // 1. compute flow velocity
-        // https://physics.stackexchange.com/a/131068
-        // pressure2 + 1/2 rho v^2 = pressure1
-        // rho is density in pressure2
-        // v^2 = 2(pressure1 - pressure2) / rho
-        let rho = (pressure2/this.atmosphericpressure)*this.airdensity; // kg/m^3
-        let velsqr = 2 * 1000*(pressure1 - pressure2) / rho;
-        let vel = Math.sqrt(velsqr); // m/s
-
-        // 2. cap flow at speed of sound
-        if (vel > this.speedofsound) vel = this.speedofsound;
-
-        // 3. compute mass flow
-        let volumeFlow = vel * area * 1e-6; // m^3 / sec
-        let massFlow = volumeFlow * rho; // kg / sec
-        return massFlow;
-    } else if (this.airflowmethod == 'tlv') {
-        // derived from https://www.tlv.com/global/UK/calculator/air-flow-rate-through-orifice.html
-        let pressureDifference = pressure1 - pressure2;
-        let pressureRatio = pressureDifference / pressure1;
-        let specificHeatRatio = 1.4;
-        let F_gamma = specificHeatRatio/1.4; // "specific heat ratio factor"
-        let x_T = 0.72; // "pressure differential ratio factor"
-        let C = 0.63; // "discharge coefficient"
-        let T_a = 20; // air temperature (deg. C)
-
-        let Q_a; // Normal m^3/min
-        if (pressureRatio < F_gamma*x_T) {
-            Q_a = 0.0695 * C * (area/5.4143) * pressure1 * (1 - (pressureRatio / (3*F_gamma*x_T))) * Math.sqrt(pressureRatio / (T_a+273.15));
-        } else {
-            Q_a = 0.046333 * C * (area/5.4143) * pressure1 * Math.sqrt((F_gamma*x_T)/(T_a+273.15));
-        }
-        let massFlow = Q_a * this.airdensity / 60; // kg/sec
-        return massFlow;
-    } else if (this.airflowmethod == 'billhall') {
-        // from a document written by Bill Hall about his "Perform.exe" program, sent to me by Duncan Webster
-        let Cd = 0.8; // coefficient of discharge
-        let Ai = area * 1e-6; // m^2
-        let v0 = 1/this.airdensity; // "specific volume"
-        let p0 = pressure1 * 1e3; // Pa
-        let p = pressure2 * 1e3; // Pa
-        let n = 1.4; // heat capacity ratio of air
-        let criticalPressureRatio =  Math.pow(2/(n+1), n/(n-1));
-        let pc = p0 * criticalPressureRatio;
-        let pprime = p > pc ? p : pc;
-        let massFlow = Cd * Ai * (1/v0) * Math.pow(pprime/p0, 1/n) * Math.sqrt(2 * (n/(n-1)) * p0 * v0 * (1 - Math.pow((pprime/p0), (n-1)/n)));
-        return massFlow;
-    } else { // this.airflowmethod == 'linear'
-        let airFlowRate = 10; // kg/(m^2.kPa.sec)
-        let pressureDifference = pressure1 - pressure2;
-        return area * pressureDifference * airFlowRate * 1e-6;
-    }
-};
-
-// limit the given airFlow (kg) from pressure1 (kPa) to pressure2 (kPa) so that the resultant pressure in the destination volume (mm^3) does not overshoot the supply pressure (pressure1)
-// need to make sure that we *do* allow pressure to decrease when it is already
-// above the supply pressure (i.e. only clamp airFlow in the direction of making
-// things worse)
-// TODO: move to AirVolume?
-Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) {
-    let newMass = this.computeMass(pressure2, volume) + airFlow;
-    let newPressure = this.computePressure(newMass, volume);
-    let pressureDifference = pressure1 - pressure2;
-
-    if (pressureDifference > 0) { // airFlow should be positive
-        if (airFlow < 0) return 0;
-        if (newPressure <= pressure1) return airFlow;
-        return this.computeMass(pressure1, volume) - this.computeMass(pressure2, volume);
-    } else { // airFlow should be negative
-        if (airFlow > 0) return 0;
-        if (newPressure >= pressure1) return airFlow;
-        return this.computeMass(pressure1, volume) - this.computeMass(pressure2, volume);
-    }
-};
 
 Engine.prototype.reducedPortArea = function(area, d) {
     let totalheight = this.stroke/2 + this.rodlength + this.deadspace;
