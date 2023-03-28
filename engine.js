@@ -73,35 +73,26 @@ Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
 
     // compute the effective port locations
-    let inletPortX = Math.sin(this.inletportangle * Math.PI/180) * this.portthrow;
-    let inletPortY = Math.cos(this.inletportangle * Math.PI/180) * this.portthrow;
-    let exhaustPortX = Math.sin(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    let exhaustPortY = Math.cos(this.exhaustportangle * Math.PI/180) * this.portthrow;
-    let cylinderPortX = Math.sin(this.cylinderangle * Math.PI/180) * this.portthrow;
-    let cylinderPortY = Math.cos(this.cylinderangle * Math.PI/180) * this.portthrow;
-
-    this.inletportx = inletPortX;
-    this.inletporty = inletPortY;
-    this.exhaustportx = exhaustPortX;
-    this.exhaustporty = exhaustPortY;
-    this.cylinderportx = cylinderPortX;
-    this.cylinderporty = cylinderPortY;
+    this.inletportx = Math.sin(this.inletportangle * Math.PI/180) * this.portthrow;
+    this.inletporty = Math.cos(this.inletportangle * Math.PI/180) * this.portthrow;
+    this.exhaustportx = Math.sin(this.exhaustportangle * Math.PI/180) * this.portthrow;
+    this.exhaustporty = Math.cos(this.exhaustportangle * Math.PI/180) * this.portthrow;
+    this.cylinderportx = Math.sin(this.cylinderangle * Math.PI/180) * this.portthrow;
+    this.cylinderporty = Math.cos(this.cylinderangle * Math.PI/180) * this.portthrow;
 
     // compute port overlap areas
-    let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
-    let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter/2); // mm^2
+    this.inletportarea = areaOfIntersection(this.inletportx, this.inletporty, this.inletportdiameter/2, this.cylinderportx, this.cylinderporty, this.cylinderportdiameter/2); // mm^2
+    this.exhaustportarea= areaOfIntersection(this.exhaustportx, this.exhaustporty, this.exhaustportdiameter/2, this.cylinderportx, this.cylinderporty, this.cylinderportdiameter/2); // mm^2
 
     if (this.straightports) {
         // if port is not fully exposed, reduce areas accordingly
-        inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter); // mm^2
-        exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter); // mm^2
+        this.inletportarea = this.reducedPortArea(this.inletportarea, this.cylinderportdiameter); // mm^2
+        this.exhaustportarea = this.reducedPortArea(this.exhaustportarea, this.cylinderportdiameter); // mm^2
     }
-    this.inletportarea = inletPortArea;
-    this.exhaustportarea = exhaustPortArea;
 
     // let air through ports
-    let inletAirMass = this.volumes[0].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
-    let exhaustAirMass = -this.volumes[0].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
+    let inletAirMass = this.volumes[0].getClampedFlow(this.airflowmethod, this.inletpressure, this.inletportarea, dt); // kg
+    let exhaustAirMass = -this.volumes[0].getClampedFlow(this.airflowmethod, this.atmosphericpressure, this.exhaustportarea, dt); // kg
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
@@ -110,35 +101,26 @@ Engine.prototype.step = function(dt) {
 
     // TODO: refactor, so that we're generic about the number of volumes
     if (this.doubleacting) {
-        let inletPortX = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        let inletPortY = Math.cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
-        let exhaustPortX = Math.sin((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        let exhaustPortY = Math.cos((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
-        let cylinderPortX = Math.sin((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
-        let cylinderPortY = Math.cos((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
-
-        this.inletportx2 = inletPortX;
-        this.inletporty2 = inletPortY;
-        this.exhaustportx2 = exhaustPortX;
-        this.exhaustporty2 = exhaustPortY;
-        this.cylinderportx2 = cylinderPortX;
-        this.cylinderporty2 = cylinderPortY;
+        this.inletportx2 = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
+        this.inletporty2 = Math.cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
+        this.exhaustportx2 = Math.sin((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
+        this.exhaustporty2 = Math.cos((180 + this.exhaustportangle2) * Math.PI/180) * this.portthrow2;
+        this.cylinderportx2 = Math.sin((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
+        this.cylinderporty2 = Math.cos((180 + this.cylinderangle) * Math.PI/180) * this.portthrow2;
 
         // compute port overlap areas
-        let inletPortArea = areaOfIntersection(inletPortX, inletPortY, this.inletportdiameter2/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter2/2); // mm^2
-        let exhaustPortArea = areaOfIntersection(exhaustPortX, exhaustPortY, this.exhaustportdiameter2/2, cylinderPortX, cylinderPortY, this.cylinderportdiameter2/2); // mm^2
+        this.inletportarea2 = areaOfIntersection(this.inletportx2, this.inletporty2, this.inletportdiameter2/2, this.cylinderportx2, this.cylinderporty2, this.cylinderportdiameter2/2); // mm^2
+        this.exhaustportarea2 = areaOfIntersection(this.exhaustportx2, this.exhaustporty2, this.exhaustportdiameter2/2, this.cylinderportx2, this.cylinderporty2, this.cylinderportdiameter2/2); // mm^2
 
         if (this.straightports) {
             // if port is not fully exposed, reduce areas accordingly
-            // TODO: inletPortArea = this.reducedPortArea(inletPortArea, this.cylinderportdiameter2); // mm^2
-            // TODO: exhaustPortArea = this.reducedPortArea(exhaustPortArea, this.cylinderportdiameter2); // mm^2
+            // TODO: this.inletportarea2 = this.reducedPortArea(this.inletportarea2, this.cylinderportdiameter2); // mm^2
+            // TODO: this.exhaustportarea2 = this.reducedPortArea(this.exhaustportarea2, this.cylinderportdiameter2); // mm^2
         }
-        this.inletportarea2 = inletPortArea;
-        this.exhaustportarea2 = exhaustPortArea;
 
         // let air through ports
-        let inletAirMass = this.volumes[1].getClampedFlow(this.airflowmethod, this.inletpressure, inletPortArea, dt); // kg
-        let exhaustAirMass = -this.volumes[1].getClampedFlow(this.airflowmethod, this.atmosphericpressure, exhaustPortArea, dt); // kg
+        let inletAirMass = this.volumes[1].getClampedFlow(this.airflowmethod, this.inletpressure, this.inletportarea2, dt); // kg
+        let exhaustAirMass = -this.volumes[1].getClampedFlow(this.airflowmethod, this.atmosphericpressure, this.exhaustportarea2, dt); // kg
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
