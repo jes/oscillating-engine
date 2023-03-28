@@ -182,21 +182,9 @@ Engine.prototype.computeCylinderPosition = function() {
 
 // return the mass of air flowing through the given port, connected to the given pressure, into or out of the given volume
 Engine.prototype.portFlow = function(portangle, portdiameter, pressure, cylinderangle, cylinderportdiameter, portthrow, vol, dt) {
-    let portx = Math.sin(portangle * Math.PI/180) * portthrow;
-    let porty = Math.cos(portangle * Math.PI/180) * portthrow;
-    let cylinderportx = Math.sin(cylinderangle * Math.PI/180) * portthrow;
-    let cylinderporty = Math.cos(cylinderangle * Math.PI/180) * portthrow;
-
-    // compute port overlap areas
-    let portarea = areaOfIntersection(portx, porty, portdiameter/2, cylinderportx, cylinderporty, cylinderportdiameter/2); // mm^2
-
-    if (this.straightports) {
-        // if port is not fully exposed, reduce areas accordingly
-        portarea = this.reducedPortArea(portarea, cylinderportdiameter); // mm^2
-    }
-
-    // let air through ports
-    return this.volumes[vol].getClampedFlow(this.airflowmethod, pressure, portarea, dt); // kg
+    let port1 = new Port(portangle, portthrow, portdiameter, this.volumes[vol]);
+    let port2 = new Port(cylinderangle, portthrow, cylinderportdiameter, new AirVolume(pressure));
+    return port1.flow(port2, this.airflowmethod, dt);
 };
 
 Engine.prototype.reducedPortArea = function(area, d) {
