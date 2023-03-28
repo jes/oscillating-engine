@@ -1,4 +1,8 @@
 function sigfigs(v, sf) {
+    if (v < 0) {
+        return "-" + sigfigs(-v, sf);
+    }
+
     if (v == 0) {
         // toPrecision is 1 short of decimal places when v==0, so add an extra one
         return v.toPrecision(sf) + '0';
