@@ -90,15 +90,29 @@ function drawPorts() {
 
     push();
 
+    let inletportx = sin(engine.inletportangle * Math.PI/180) * engine.portthrow;
+    let inletporty = cos(engine.inletportangle * Math.PI/180) * engine.portthrow;
+    let exhaustportx = sin(engine.exhaustportangle * Math.PI/180) * engine.portthrow;
+    let exhaustporty = cos(engine.exhaustportangle * Math.PI/180) * engine.portthrow;
+    let cylinderportx = sin(engine.cylinderangle * Math.PI/180) * engine.portthrow;
+    let cylinderporty = cos(engine.cylinderangle * Math.PI/180) * engine.portthrow;
+
     translate(engine_centre_px, centre_px);
-    circle(engine.inletportx*px_per_mm, -engine.inletporty*px_per_mm, engine.inletportdiameter*px_per_mm);
-    circle(engine.exhaustportx*px_per_mm, -engine.exhaustporty*px_per_mm, engine.exhaustportdiameter*px_per_mm);
-    circle(engine.cylinderportx*px_per_mm, -engine.cylinderporty*px_per_mm, engine.cylinderportdiameter*px_per_mm);
+    circle(inletportx*px_per_mm, -inletporty*px_per_mm, engine.inletportdiameter*px_per_mm);
+    circle(exhaustportx*px_per_mm, -exhaustporty*px_per_mm, engine.exhaustportdiameter*px_per_mm);
+    circle(cylinderportx*px_per_mm, -cylinderporty*px_per_mm, engine.cylinderportdiameter*px_per_mm);
 
     if (engine.doubleacting) {
-        circle(engine.inletportx2*px_per_mm, -engine.inletporty2*px_per_mm, engine.inletportdiameter2*px_per_mm);
-        circle(engine.exhaustportx2*px_per_mm, -engine.exhaustporty2*px_per_mm, engine.exhaustportdiameter2*px_per_mm);
-        circle(engine.cylinderportx2*px_per_mm, -engine.cylinderporty2*px_per_mm, engine.cylinderportdiameter2*px_per_mm);
+        let inletportx = sin((engine.inletportangle2 + 180) * Math.PI/180) * engine.portthrow2;
+        let inletporty = cos((engine.inletportangle2 + 180) * Math.PI/180) * engine.portthrow2;
+        let exhaustportx = sin((engine.exhaustportangle2 + 180) * Math.PI/180) * engine.portthrow2;
+        let exhaustporty = cos((engine.exhaustportangle2 + 180) * Math.PI/180) * engine.portthrow2;
+        let cylinderportx = sin((engine.cylinderangle + 180) * Math.PI/180) * engine.portthrow2;
+        let cylinderporty = cos((engine.cylinderangle + 180) * Math.PI/180) * engine.portthrow2;
+
+        circle(inletportx*px_per_mm, -inletporty*px_per_mm, engine.inletportdiameter2*px_per_mm);
+        circle(exhaustportx*px_per_mm, -exhaustporty*px_per_mm, engine.exhaustportdiameter2*px_per_mm);
+        circle(cylinderportx*px_per_mm, -cylinderporty*px_per_mm, engine.cylinderportdiameter2*px_per_mm);
     }
 
     pop();
