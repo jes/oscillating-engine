@@ -31,6 +31,37 @@ Port.prototype.flow = function(port, method, dt) {
     // compute port overlap areas
     this.overlaparea = areaOfIntersection(this.x, this.y, this.diameter/2, port.x, port.y, port.diameter/2); // mm^2
 
+    return this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
+};
+
+// return the mass flowed into this port, grom the given port, using the given
+// air flow method, over the given time, with the overlap area reduced if it is blocked by the piston
+// "pistonheight" is the cutoff face of the piston, in mm above the pivot point, swung by "port.angle", "above" says the volume is above the piston (true for the primary volume, false for secondary)
+// update this.overlaparea
+Port.prototype.reducedFlow = function(port, pistonheight, above, method, dt) {
+    // compute port overlap areas
+    this.overlaparea = areaOfIntersection(this.x, this.y, this.diameter/2, port.x, port.y, port.diameter/2); // mm^2
+
+    if (above) {
+        if (pistonheight > port.swingradius+port.diameter/2) {
+            // port is completely covered up
+            this.overlaparea = 0;
+        } else if (pistonheight > port.swingradius-port.diameter/2) {
+            // port is partially covered up
+            let start = port.swingradius-port.diameter/2;
+            this.overlaparea *= 1 - ((pistonheight-start)/port.diameter);
+        }
+    } else {
+        if (pistonheight < -(port.swingradius+port.diameter/2)) {
+            // port is completely covered up
+            this.overlaparea = 0;
+        } else if (pistonheight < -(port.swingradius-port.diameter/2)) {
+            // port is partially covered up
+            let start = -(port.swingradius-port.diameter/2);
+            this.overlaparea *= -(pistonheight-start)/port.diameter;
+        }
+    }
+
     // TODO: how do we allow the piston to block the ports?
     //if (this.straightports) {
         // if port is not fully exposed, reduce areas accordingly
@@ -59,4 +90,4 @@ function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
 }
 
 if (window.module !== undefined)
-    module.exports = { Engine };
+    module.exports = { Port };

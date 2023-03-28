@@ -85,8 +85,15 @@ Engine.prototype.step = function(dt) {
     let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
 
     // compute the flow through the ports
-    let inletAirMass = -this.inletport.flow(this.cylinderport, this.airflowmethod, dt); // kg
-    let exhaustAirMass = this.exhaustport.flow(this.cylinderport, this.airflowmethod, dt); // kg
+    let piston_height_above_pivot = -(this.pistonheight - (this.stroke/2 + this.rodlength + this.deadspace) + this.pivotseparation);
+    let inletAirMass; let exhaustAirMass;
+    if (this.straightports) {
+        inletAirMass = -this.inletport.reducedFlow(this.cylinderport, piston_height_above_pivot, true, this.airflowmethod, dt); // kg
+        exhaustAirMass = this.exhaustport.reducedFlow(this.cylinderport, piston_height_above_pivot, true, this.airflowmethod, dt); // kg
+    } else {
+        inletAirMass = -this.inletport.flow(this.cylinderport, this.airflowmethod, dt); // kg
+        exhaustAirMass = this.exhaustport.flow(this.cylinderport, this.airflowmethod, dt); // kg
+    }
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
@@ -193,26 +200,6 @@ Engine.prototype.computeCylinderPosition = function() {
     // update port locations
     this.cylinderport.setAngle(this.cylinderangle);
     this.cylinderport2.setAngle(180+this.cylinderangle);
-};
-
-Engine.prototype.reducedPortArea = function(area, d) {
-    let totalheight = this.stroke/2 + this.rodlength + this.deadspace;
-    let portheight = totalheight - (this.pivotseparation + this.portthrow); // mm - height of port centres from top of cylinder
-
-    // TODO: what about the secondary volume?
-
-    if (this.pistonheight < portheight-d/2) {
-        // port is completely covered up
-        return 0;
-    } else if (this.pistonheight < portheight+d/2) {
-        // port is partially covered up
-        // TODO: this assumes area changes linearly with height, this is not correct
-        let start = portheight-d/2;
-        return area * (this.pistonheight-start)/d;
-    } else {
-        // port is completely exposed
-        return area;
-    }
 };
 
 if (window.module !== undefined)
