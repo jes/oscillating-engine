@@ -39,7 +39,7 @@ function drawCylinder() {
     noStroke();
     let atmospheric_colour = color(0,255,255);
     let inlet_colour = color(255,0,0);
-    let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.cylinderpressure-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
+    let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.volumes[0].getPressure()-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
     gas_colour.setAlpha(127);
     fill(gas_colour);
     rect(-cylinder_width_px/2, -pivot_height_mm*px_per_mm, cylinder_width_px, engine.pistonheight * px_per_mm); // cylinder gases
@@ -48,7 +48,7 @@ function drawCylinder() {
         // height of pivot from bottom of cylinder
         let pivot_height_mm2 = cylinder_height_mm + engine.pistonlength - pivot_height_mm;
 
-        let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.cylinderpressure2-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
+        let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.volumes[1].getPressure()-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
         gas_colour.setAlpha(127);
         fill(gas_colour);
         rect(-cylinder_width_px/2, pivot_height_mm2*px_per_mm, cylinder_width_px, -engine.pistonheight2 * px_per_mm); // cylinder gases

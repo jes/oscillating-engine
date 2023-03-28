@@ -30,8 +30,7 @@ function Engine() {
     this.roddiameter = 0;
 
     // state:
-    this.cylinderpressure = 0; // kPa
-    this.cylinderpressure2 = 0; // kPa (secondary pressure, for double-acting)
+    this.volumes = [ new AirVolume(0, 0), new AirVolume(0, 0) ]; // cylinder air volumes (primary and secondary)
     this.crankposition = 0; // degrees - TDC=0
     this.rpm = 0; // rpm
 
@@ -40,15 +39,13 @@ function Engine() {
     this.pistonheight = 0; // mm from top of cylinder
     this.crankpinx = 0; // mm from crank centre
     this.crankpiny = 0; // mm from crank centre
-    this.cylindervolume = 0; // mm^3
-    this.cylindervolume2 = 0; // mm^3 (secondary volume, for double-acting)
 
     this.reset();
 }
 
 Engine.prototype.reset = function() {
-    this.cylinderpressure = this.inletpressure;
-    this.cylinderpressure2 = this.inletpressure;
+    this.volumes[0].setPressure(this.inletpressure);
+    this.volumes[1].setPressure(this.inletpressure);
     this.crankposition = 0;
     this.rpm = 200;
     this.computeCylinderPosition();
@@ -74,7 +71,7 @@ Engine.prototype.reset = function() {
 
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
-    let currentAirMass = this.computeMass(this.cylinderpressure, this.cylindervolume); // kg
+    let currentAirMass = this.volumes[0].getMass(); // kg
 
     // compute the effective port locations
     let inletPortX = Math.sin(this.inletportangle * Math.PI/180) * this.portthrow;
@@ -104,20 +101,21 @@ Engine.prototype.step = function(dt) {
     this.exhaustportarea = exhaustPortArea;
 
     // if inlet port is open, let some air in (proportional to pressure difference and port area)
-    let inletAirMass = this.airFlow(this.inletpressure, this.cylinderpressure, inletPortArea) * dt; // kg
-    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.cylinderpressure, this.cylindervolume); // kg
+    let inletAirMass = this.airFlow(this.inletpressure, this.volumes[0].getPressure(), inletPortArea) * dt; // kg
+    inletAirMass = this.clampAirFlow(inletAirMass, this.inletpressure, this.volumes[0].getPressure(), this.volumes[0].getVolume()); // kg
 
     // if exhaust port is open, let some air out (proportional to pressure difference and port area)
-    let exhaustAirMass = this.airFlow(this.cylinderpressure, this.atmosphericpressure, exhaustPortArea) * dt; // kg
-    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.cylinderpressure, this.cylindervolume); // kg
+    let exhaustAirMass = this.airFlow(this.volumes[0].getPressure(), this.atmosphericpressure, exhaustPortArea) * dt; // kg
+    exhaustAirMass = -this.clampAirFlow(-exhaustAirMass, this.atmosphericpressure, this.volumes[0].getPressure(), this.volumes[0].getVolume()); // kg
 
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
     let currentAirMass2;
     let inletAirMass2;
     let exhaustAirMass2;
+    // TODO: refactor, so that we're generic about the number of volumes
     if (this.doubleacting) {
-        currentAirMass2 = this.computeMass(this.cylinderpressure2, this.cylindervolume2); // kg
+        currentAirMass2 = this.volumes[1].getMass();
 
         let inletPortX = Math.sin((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
         let inletPortY = Math.cos((180 + this.inletportangle2) * Math.PI/180) * this.portthrow2;
@@ -146,18 +144,18 @@ Engine.prototype.step = function(dt) {
         this.exhaustportarea2 = exhaustPortArea;
 
         // if inlet port is open, let some air in (proportional to pressure difference and port area)
-        inletAirMass2 = this.airFlow(this.inletpressure, this.cylinderpressure2, inletPortArea) * dt; // kg
-        inletAirMass2 = this.clampAirFlow(inletAirMass2, this.inletpressure, this.cylinderpressure2, this.cylindervolume2); // kg
+        inletAirMass2 = this.airFlow(this.inletpressure, this.volumes[1].getPressure(), inletPortArea) * dt; // kg
+        inletAirMass2 = this.clampAirFlow(inletAirMass2, this.inletpressure, this.volumes[1].getPressure(), this.volumes[1].getVolume()); // kg
 
         // if exhaust port is open, let some air out (proportional to pressure difference and port area)
-        exhaustAirMass2 = this.airFlow(this.cylinderpressure2, this.atmosphericpressure, exhaustPortArea) * dt; // kg
-        exhaustAirMass2 = -this.clampAirFlow(-exhaustAirMass2, this.atmosphericpressure, this.cylinderpressure2, this.cylindervolume2); // kg
+        exhaustAirMass2 = this.airFlow(this.volumes[1].getPressure(), this.atmosphericpressure, exhaustPortArea) * dt; // kg
+        exhaustAirMass2 = -this.clampAirFlow(-exhaustAirMass2, this.atmosphericpressure, this.volumes[1].getPressure(), this.volumes[1].getVolume()); // kg
     }
 
     // calculate torque from piston
     let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
-    pistonForce = 1000 * this.cylinderpressure * pistonArea*1e-6; // Newtons
-    let opposingForce = 1000 * (this.doubleacting ? (this.cylinderpressure2 * (pistonArea-rodArea)*1e-6 + this.atmosphericpressure*rodArea*1e-6) : (this.atmosphericpressure * pistonArea*1e-6)); // Newtons
+    pistonForce = 1000 * this.volumes[0].getPressure() * pistonArea*1e-6; // Newtons
+    let opposingForce = 1000 * (this.doubleacting ? (this.volumes[1].getPressure() * (pistonArea-rodArea)*1e-6 + this.atmosphericpressure*rodArea*1e-6) : (this.atmosphericpressure * pistonArea*1e-6)); // Newtons
     pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
     crankTorque = (pistonForce-opposingForce) * (pistonActingDistance * 0.001); // Nm
 
@@ -215,9 +213,9 @@ Engine.prototype.step = function(dt) {
     this.computeCylinderPosition();
 
     // calculate updated cylinder pressure
-    this.cylinderpressure = this.computePressure(currentAirMass + inletAirMass - exhaustAirMass, this.cylindervolume);
+    this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     if (this.doubleacting)
-        this.cylinderpressure2 = this.computePressure(currentAirMass2 + inletAirMass2 - exhaustAirMass2, this.cylindervolume2);
+        this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass2 - exhaustAirMass2);
 
     // calculate updated efficiency
     let energy = this.power / (this.meanrpm/ 60);
@@ -243,28 +241,31 @@ Engine.prototype.computeCylinderPosition = function() {
 
     // 4. find cylinder volume
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2);
-    this.cylindervolume = this.pistonheight * pistonArea; // mm^3
+    this.volumes[0].setVolume(this.pistonheight * pistonArea); // mm^3
 
     if (this.doubleacting) {
         // find height of piston from bottom of cylinder
         this.pistonheight2 = this.deadspace2 + this.stroke/2 + this.pivotseparation - dist;
         let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
-        this.cylindervolume2 = this.pistonheight2 * (pistonArea - rodArea); // mm^3
+        this.volumes[1].setVolume(this.pistonheight2 * (pistonArea - rodArea)); // mm^3
     }
 };
 
 // return the pressure (kPa) of a given mass (kg) of air in a given volume (mm^3)
+// TODO: delete, move to AirVolume
 Engine.prototype.computePressure = function(mass, volume) {
     let pressureRatio = mass / (volume*1e-9 * this.airdensity);
     return pressureRatio * this.atmosphericpressure;
 };
 
 // return the mass (kg) of a given pressure (kPa) of air in a given volume (mm^3)
+// TODO: delete, move to AirVolume
 Engine.prototype.computeMass = function(pressure, volume) {
     return (pressure/this.atmosphericpressure) * (volume*1e-9) * this.airdensity;
 }
 
 // return the rate of air flow from pressure1 (kPa) to pressure2 (kPa) through the given area (mm^2), in kg/sec
+// TODO: move to AirVolume?
 Engine.prototype.airFlow = function(pressure1, pressure2, area) {
     // is the air flowing the correct way?
     if (pressure2 > pressure1) return -this.airFlow(pressure2, pressure1, area);
@@ -342,6 +343,7 @@ Engine.prototype.airFlow = function(pressure1, pressure2, area) {
 // need to make sure that we *do* allow pressure to decrease when it is already
 // above the supply pressure (i.e. only clamp airFlow in the direction of making
 // things worse)
+// TODO: move to AirVolume?
 Engine.prototype.clampAirFlow = function(airFlow, pressure1, pressure2, volume) {
     let newMass = this.computeMass(pressure2, volume) + airFlow;
     let newPressure = this.computePressure(newMass, volume);
@@ -396,4 +398,5 @@ function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
   return area1 + area2;
 }
 
-module.exports = { Engine };
+if (window.module !== undefined)
+    module.exports = { Engine };

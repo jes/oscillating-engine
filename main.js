@@ -182,7 +182,7 @@ function draw() {
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
             if (pvcount++ == 20) {
-                pvdiagram.add(engine.cylinderpressure, engine.cylindervolume, engine.cylinderpressure2, engine.cylindervolume2);
+                pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
             }
             timingdiagram.add(engine.crankposition, engine.inletportarea, engine.exhaustportarea);
@@ -216,8 +216,8 @@ function draw() {
     pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120), engine.doubleacting); // draw inside the rest of the canvas
 
     txt('rpm', sigfigs(engine.rpm, 4));
-    txt('pressure', sigfigs(engine.cylinderpressure-engine.atmosphericpressure, 4));
-    txt('pressure2', sigfigs(engine.cylinderpressure2-engine.atmosphericpressure, 4));
+    txt('pressure', sigfigs(engine.volumes[0].getPressure()-engine.atmosphericpressure, 4));
+    txt('pressure2', sigfigs(engine.volumes[0].getPressure()-engine.atmosphericpressure, 4));
     txt('torque', sigfigs(engine.torque, 4));
     txt('meanrpm', sigfigs(engine.meanrpm, 4));
     txt('power', sigfigs(engine.power, 4));
