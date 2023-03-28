@@ -82,6 +82,7 @@ Engine.prototype.makePorts = function() {
 
 Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
+    let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
 
     // compute the flow through the ports
     let inletAirMass = -this.inletport.flow(this.cylinderport, this.airflowmethod, dt); // kg
@@ -101,11 +102,10 @@ Engine.prototype.step = function(dt) {
     }
 
     // calculate torque from piston
-    let rodArea = Math.PI * (this.roddiameter/2)*(this.roddiameter/2);
-    pistonForce = 1000 * this.volumes[0].getPressure() * pistonArea*1e-6; // Newtons
+    let pistonForce = 1000 * this.volumes[0].getPressure() * pistonArea*1e-6; // Newtons
     let opposingForce = 1000 * (this.doubleacting ? (this.volumes[1].getPressure() * (pistonArea-rodArea)*1e-6 + this.atmosphericpressure*rodArea*1e-6) : (this.atmosphericpressure * pistonArea*1e-6)); // Newtons
-    pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
-    crankTorque = (pistonForce-opposingForce) * (pistonActingDistance * 0.001); // Nm
+    let pistonActingDistance = -Math.sin(this.cylinderangle * Math.PI/180) * this.pivotseparation; // mm
+    let crankTorque = (pistonForce-opposingForce) * (pistonActingDistance * 0.001); // Nm
 
     // calculate flywheel angular velocity with piston torque
     let angularacceleration = (crankTorque - this.load) / this.flywheelmomentofinertia; // rad/s^2
