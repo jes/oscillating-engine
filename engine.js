@@ -73,8 +73,8 @@ Engine.prototype.step = function(dt) {
     let pistonArea = Math.PI * (this.bore/2)*(this.bore/2); // mm^2
 
     // compute the flow through the ports
-    let inletAirMass = this.flow(this.inletportangle, this.inletportdiameter, this.inletpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
-    let exhaustAirMass = -this.flow(this.exhaustportangle, this.exhaustportdiameter, this.atmosphericpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
+    let inletAirMass = this.portFlow(this.inletportangle, this.inletportdiameter, this.inletpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
+    let exhaustAirMass = -this.portFlow(this.exhaustportangle, this.exhaustportdiameter, this.atmosphericpressure, this.cylinderangle, this.cylinderportdiameter, this.portthrow, 0, dt); // kg
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
@@ -82,8 +82,8 @@ Engine.prototype.step = function(dt) {
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
     if (this.doubleacting) {
-        let inletAirMass = this.flow(this.inletportangle2+180, this.inletportdiameter2, this.inletpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
-        let exhaustAirMass = -this.flow(this.exhaustportangle2+180, this.exhaustportdiameter2, this.atmosphericpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
+        let inletAirMass = this.portFlow(this.inletportangle2+180, this.inletportdiameter2, this.inletpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
+        let exhaustAirMass = -this.portFlow(this.exhaustportangle2+180, this.exhaustportdiameter2, this.atmosphericpressure, this.cylinderangle+180, this.cylinderportdiameter2, this.portthrow2, 1, dt); // kg
 
         this.volumes[1].setMass(this.volumes[1].getMass() + inletAirMass - exhaustAirMass);
         this.sumairmass += inletAirMass;
@@ -181,7 +181,7 @@ Engine.prototype.computeCylinderPosition = function() {
 };
 
 // return the mass of air flowing through the given port, connected to the given pressure, into or out of the given volume
-Engine.prototype.flow = function(portangle, portdiameter, pressure, cylinderangle, cylinderportdiameter, portthrow, vol, dt) {
+Engine.prototype.portFlow = function(portangle, portdiameter, pressure, cylinderangle, cylinderportdiameter, portthrow, vol, dt) {
     let portx = Math.sin(portangle * Math.PI/180) * portthrow;
     let porty = Math.cos(portangle * Math.PI/180) * portthrow;
     let cylinderportx = Math.sin(cylinderangle * Math.PI/180) * portthrow;
