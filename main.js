@@ -195,6 +195,7 @@ function draw() {
     }
 
     background(220);
+    stroke(0);
 
     // draw the engine schematic
     drawFlywheel();
