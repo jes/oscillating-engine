@@ -3,6 +3,8 @@ if (typeof module !== 'undefined') {
     var { Port } = require('./port.js');
 }
 
+let parameters = ['bore', 'stroke', 'portthrow', 'deadspace', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'inletpressure', 'frictiontorque', 'loadperrpm', 'load', 'airdensity', 'speedofsound', 'airflowmethod', 'straightports', 'doubleacting', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'ehaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2'];
+
 function Engine() {
     // parameters:
     this.stroke = 30; // mm
@@ -83,6 +85,25 @@ Engine.prototype.makePorts = function() {
     this.inletport2 = new Port(180+this.inletportangle2, this.portthrow2, this.inletportdiameter2, new AirVolume(this.inletpressure));
     this.exhaustport2 = new Port(180+this.exhaustportangle2, this.portthrow2, this.exhaustportdiameter2, new AirVolume(this.atmosphericpressure));
     this.cylinderport2 = new Port(180+this.cylinderangle, this.portthrow2, this.cylinderportdiameter2, this.volumes[1]);
+};
+
+Engine.prototype.stop = function() {
+    this.stopped = true;
+};
+
+Engine.prototype.run = function() {
+    this.stopped = false;
+    while (!this.stopped && !this.stalled) {
+        this.step(0.00001);
+    }
+};
+
+Engine.prototype.clone = function() {
+    let e = new Engine();
+    for (let field of parameters)
+        e[field] = this[field];
+    e.makePorts();
+    return e;
 };
 
 Engine.prototype.step = function(dt) {
