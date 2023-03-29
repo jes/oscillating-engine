@@ -83,5 +83,5 @@ function areaOfIntersection(x0, y0, r0, x1, y1, r1) {
   return area1 + area2;
 }
 
-if (window.module !== undefined)
+if (typeof module !== 'undefined')
     module.exports = { Port };

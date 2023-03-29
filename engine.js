@@ -1,3 +1,8 @@
+if (typeof module !== 'undefined') {
+    var { AirVolume } = require('./airvolume.js');
+    var { Port } = require('./port.js');
+}
+
 function Engine() {
     // parameters:
     this.stroke = 30; // mm
@@ -208,5 +213,5 @@ Engine.prototype.computeCylinderPosition = function() {
     this.cylinderport2.setAngle(180+this.cylinderangle);
 };
 
-if (window.module !== undefined)
+if (typeof module !== 'undefined')
     module.exports = { Engine };

@@ -215,5 +215,5 @@ AirVolume.prototype.getClampedFlow = function(method, airvolume, area, dt) {
     return flow;
 };
 
-if (window.module !== undefined)
+if (typeof module !== 'undefined')
     module.exports = { AirVolume };
