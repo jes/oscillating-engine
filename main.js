@@ -185,7 +185,10 @@ function draw() {
                 pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
             }
-            timingdiagram.add(engine.crankposition, engine.inletport.overlaparea, engine.exhaustport.overlaparea);
+            if (txtval('diagramselect') == 'area1')
+                timingdiagram.add(engine.crankposition, engine.inletport.overlaparea, engine.exhaustport.overlaparea);
+            else if (txtval('diagramselect') == 'flow1')
+                timingdiagram.add(engine.crankposition, -engine.inletport.flowrate, engine.exhaustport.flowrate);
             // TODO: how to draw secondary timing diagram?
             if ((new Date()) - start > maxRuntime) {
                 txt('tooslow', '(!)');
@@ -322,3 +325,7 @@ btn('pauseresume', function() {
     if (paused) txt('pauseresume', 'Resume');
     else txt('pauseresume', 'Pause');
 });
+
+document.getElementById('diagramselect').onchange = function() {
+    timingdiagram.clear();
+};

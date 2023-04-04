@@ -3,8 +3,9 @@ const { Engine } = require('./engine.js');
 let engine = new Engine();
 
 let cantweak = [
-    'inletportangle', 'exhaustportangle', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter',
-    'portthrow', 'pivotseparation', 'deadspace',
+    'deadspace', 'pivotseparation', 'portthrow', 'inletportdiameter',
+    'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle',
+    'exhaustportangle',
 ];
 
 let best = {

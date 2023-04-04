@@ -6,6 +6,7 @@ function Port(angle, swingradius, diameter, airvolume) {
     this.airvolume = airvolume;
 
     this.overlaparea = 0;
+    this.flowrate = 0;
     this.x = 0;
     this.y = 0;
 
@@ -31,7 +32,9 @@ Port.prototype.flow = function(port, method, dt) {
     // compute port overlap areas
     this.overlaparea = areaOfIntersection(this.x, this.y, this.diameter/2, port.x, port.y, port.diameter/2); // mm^2
 
-    return this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
+    let mass = this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
+    this.flowrate = mass / dt;
+    return mass;
 };
 
 // return the mass flowed into this port, grom the given port, using the given
@@ -62,7 +65,9 @@ Port.prototype.reducedFlow = function(port, pistonheight, above, method, dt) {
         }
     }
 
-    return this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
+    let mass = this.airvolume.getClampedFlow(method, port.airvolume, this.overlaparea, dt); // kg
+    this.flowrate = mass / dt;
+    return mass;
 };
 
 // https://math.stackexchange.com/a/290526
