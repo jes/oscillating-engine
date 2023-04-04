@@ -180,15 +180,18 @@ function draw() {
 
     if (!paused) {
         let secs = deltaTime / 1000.0;
-        let stepTime = 0.00001;
+        let stepTime = val("timestep") / 1000.0;
         let steps = timeFactor * secs/stepTime;
+
+        let pvcountperiod = 0.0002; // secs
+        let pvcountsteps = Math.floor(pvcountperiod / stepTime);
 
         let maxRuntime = 33; // ms (~30 fps)
         let start = new Date();
         txt('tooslow', '');
         for (let i = 0; i < steps; i++) {
             engine.step(stepTime);
-            if (pvcount++ == 20) {
+            if (pvcount++ >= pvcountsteps) {
                 pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
             }
