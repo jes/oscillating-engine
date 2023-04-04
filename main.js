@@ -196,7 +196,10 @@ function draw() {
                 timingdiagram.add(engine.crankposition, engine.inletport.overlaparea, engine.exhaustport.overlaparea);
             else if (txtval('diagramselect') == 'flow1')
                 timingdiagram.add(engine.crankposition, -engine.inletport.flowrate, engine.exhaustport.flowrate);
-            // TODO: how to draw secondary timing diagram?
+            else if (txtval('diagramselect') == 'area2')
+                timingdiagram.add(engine.crankposition, engine.inletport2.overlaparea, engine.exhaustport2.overlaparea);
+            else if (txtval('diagramselect') == 'flow2')
+                timingdiagram.add(engine.crankposition, -engine.inletport2.flowrate, engine.exhaustport2.flowrate);
             if ((new Date()) - start > maxRuntime) {
                 txt('tooslow', '(!)');
                 break;
@@ -319,7 +322,7 @@ function populateTimingDiagramSelect() {
     for (let v = 0; v < (engine.doubleacting ? 2 : 1); v++) {
         for (let i = 0; i < names.length; i++) {
             let opt = document.createElement('option');
-            opt.value = values[i] + (i+1);
+            opt.value = values[i] + (v+1);
             opt.innerHTML = names[i] + (engine.doubleacting ? suffixes[v] : '');
             select.appendChild(opt);
         }

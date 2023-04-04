@@ -27,7 +27,7 @@ Port.prototype.update = function() {
 
 // return the mass flowed into this port, grom the given port, using the given
 // air flow method, over the given time;
-// update this.overlaparea
+// update this.overlaparea, this.flowrate
 Port.prototype.flow = function(port, method, dt) {
     // compute port overlap areas
     this.overlaparea = areaOfIntersection(this.x, this.y, this.diameter/2, port.x, port.y, port.diameter/2); // mm^2
@@ -40,7 +40,7 @@ Port.prototype.flow = function(port, method, dt) {
 // return the mass flowed into this port, grom the given port, using the given
 // air flow method, over the given time, with the overlap area reduced if it is blocked by the piston
 // "pistonheight" is the cutoff face of the piston, in mm above the pivot point, swung by "port.angle", "above" says the volume is above the piston (true for the primary volume, false for secondary)
-// update this.overlaparea
+// update this.overlaparea, this.flowrate
 Port.prototype.reducedFlow = function(port, pistonheight, above, method, dt) {
     // compute port overlap areas
     this.overlaparea = areaOfIntersection(this.x, this.y, this.diameter/2, port.x, port.y, port.diameter/2); // mm^2
