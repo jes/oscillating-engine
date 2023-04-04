@@ -3,6 +3,8 @@ var engine;
 var pvdiagram;
 var timingdiagram;
 
+var was_double_acting = false;
+
 var paused = false;
 
 var default_piston_height_px = 10;
@@ -127,6 +129,7 @@ function setup() {
 
     loadPreset(txtval('preset'));
     update();
+    populateTimingDiagramSelect();
 }
 
 function draw() {
@@ -159,6 +162,10 @@ function draw() {
         document.getElementById('pressure2-span').style.display = 'none';
         document.getElementById('cc2-span').style.display = 'none';
     }
+    if (engine.doubleacting != was_double_acting) {
+        populateTimingDiagramSelect();
+    }
+    was_double_acting = engine.doubleacting;
 
     document.getElementById('pendingchanges').style.visibility = anychanged ? 'visible' : 'hidden';
 
@@ -299,6 +306,22 @@ function loadPreset(p) {
                 el.checked = presets[p][field];
             else
                 el.value = presets[p][field];
+        }
+    }
+}
+
+function populateTimingDiagramSelect() {
+    let select = document.getElementById('diagramselect');
+    select.innerHTML = '';
+    let names = ['Port area', 'Air flow rate'];
+    let suffixes = [' primary', ' secondary'];
+    let values = ['area', 'flow'];
+    for (let v = 0; v < (engine.doubleacting ? 2 : 1); v++) {
+        for (let i = 0; i < names.length; i++) {
+            let opt = document.createElement('option');
+            opt.value = values[i] + (i+1);
+            opt.innerHTML = names[i] + (engine.doubleacting ? suffixes[v] : '');
+            select.appendChild(opt);
         }
     }
 }
