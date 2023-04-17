@@ -17,6 +17,8 @@ var engine_centre_px = 150;
 var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'exhaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2'];
 var anychanged = false;
 
+var scopes = [];
+
 var defaults = {
     atmosphericpressure: "101.325",
     inletpressure: "50",
@@ -27,6 +29,7 @@ var defaults = {
 };
 
 var pvcount = 0;
+var scopecount = 0;
 
 var presets = {
     wigwag: {
@@ -126,6 +129,7 @@ function setup() {
     timingdiagram = new TimingDiagram(1000);
 
     setupPlots();
+    addScope();
 
     loadPreset(txtval('preset'));
     update();
@@ -185,6 +189,8 @@ function draw() {
 
         let pvcountperiod = 0.0002; // secs
         let pvcountsteps = Math.floor(pvcountperiod / stepTime);
+        let scopecountperiod = 0.02; // secs
+        let scopecountsteps = Math.floor(pvcountperiod / stepTime);
 
         let maxRuntime = 33; // ms (~30 fps)
         let start = new Date();
@@ -194,6 +200,13 @@ function draw() {
             if (pvcount++ >= pvcountsteps) {
                 pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
+            }
+            if (scopecount++ >= scopecountsteps) {
+                // update scopes
+                for (let scope of scopes) {
+                    scope.update();
+                }
+                scopecount = 0;
             }
             if (txtval('diagramselect') == 'area1')
                 timingdiagram.add(engine.crankposition, engine.inletport.overlaparea, engine.exhaustport.overlaparea);
@@ -208,6 +221,11 @@ function draw() {
                 break;
             }
         }
+    }
+
+    // draw scopes
+    for (let scope of scopes) {
+        scope.draw();
     }
 
     background(220);
@@ -332,6 +350,10 @@ function populateTimingDiagramSelect() {
     }
 }
 
+function addScope() {
+    scopes.push(new Scope(engine, document.getElementById('scopes')));
+}
+
 btn('kick', function() { engine.reset(); pvdiagram.clear(); timingdiagram.clear(); });
 document.getElementById('preset').onchange = function() {
     loadPreset(txtval('preset'));
@@ -354,6 +376,7 @@ btn('pauseresume', function() {
     if (paused) txt('pauseresume', 'Resume');
     else txt('pauseresume', 'Pause');
 });
+btn('add-scope', addScope);
 
 document.getElementById('diagramselect').onchange = function() {
     timingdiagram.clear();
