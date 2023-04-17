@@ -4,9 +4,6 @@ function Scope(engine, parentElement) {
     this.engine = engine;
     this.parentElement = parentElement;
 
-    while (this.points.length < this.maxpoints)
-        this.points.push(0);
-
     this.field = "cylinderpressure";
 
     let scope = this;
@@ -23,6 +20,7 @@ function Scope(engine, parentElement) {
         opt.value = fieldvalues[i];
         this.fieldselect.appendChild(opt);
     }
+    this.fieldselect.onchange = function() { scope.points = [] };
     this.div.appendChild(this.fieldselect);
     let delbutton = document.createElement('button');
     delbutton.innerText = '- Remove scope';
@@ -42,8 +40,8 @@ Scope.prototype.remove = function() {
 };
 
 Scope.prototype.draw = function() {
-    let minval = this.points[0];
-    let maxval = this.points[0];
+    let minval = this.points.length ? this.points[0] : 0;
+    let maxval = this.points.length ? this.points[0] : 0;
     for (let v of this.points) {
         if (v < minval) minval = v;
         if (v > maxval) maxval = v;
@@ -65,13 +63,15 @@ Scope.prototype.draw = function() {
     }
 
     // main curve
-    ctx.strokeStyle = '#3f3';
-    ctx.beginPath();
-    ctx.moveTo(0, this.points[0]);
-    for (let i in this.points) {
-        ctx.lineTo(i*600/1000.0, 10+(this.canvas.height-20)*(1-(this.points[i]-minval)/(maxval-minval)));
+    if (this.points.length) {
+        ctx.strokeStyle = '#3f3';
+        ctx.beginPath();
+        let iPlus = this.maxpoints - this.points.length;
+        for (let i in this.points) {
+            ctx.lineTo((iPlus+parseInt(i))*this.canvas.width/this.maxpoints, 10+(this.canvas.height-20)*(1-(this.points[i]-minval)/(maxval-minval)));
+        }
+        ctx.stroke();
     }
-    ctx.stroke();
 
     // min/max text labels
     ctx.fillStyle = '#3f3';
