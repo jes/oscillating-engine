@@ -25,7 +25,7 @@ Port.prototype.update = function() {
     this.y = Math.cos(this.angle * Math.PI/180) * this.swingradius;
 };
 
-// return the mass flowed into this port, grom the given port, using the given
+// return the mass flowed into this port, from the given port, using the given
 // air flow method, over the given time;
 // update this.overlaparea, this.flowrate
 Port.prototype.flow = function(port, method, dt) {
