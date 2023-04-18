@@ -38,8 +38,8 @@ function Engine() {
 
     // reservoir parameters
     this.infinitevolume = true;
-    this.reservoirvolume = 15000; // mm^3
-    this.reservoirportdiameter = 1; // mm
+    this.reservoirvolume = 12000; // mm^3
+    this.reservoirportdiameter = 0.7; // mm
 
     // state:
     this.volumes = [ new AirVolume(0, 0), new AirVolume(0, 0) ]; // cylinder air volumes (primary and secondary)
