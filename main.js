@@ -160,10 +160,8 @@ function draw() {
     }
 
     if (engine.doubleacting) {
-        document.getElementById('pressure2-span').style.display = 'inline';
         document.getElementById('cc2-span').style.display = 'inline';
     } else {
-        document.getElementById('pressure2-span').style.display = 'none';
         document.getElementById('cc2-span').style.display = 'none';
     }
     if (engine.doubleacting != was_double_acting) {
@@ -250,9 +248,6 @@ function draw() {
     translate(engine_centre_px*2,0); // offset to clear the engine
     pvdiagram.draw(canvas.width-engine_centre_px*2, canvas.height, paused || (timeFactor*engine.rpm<120), engine.doubleacting); // draw inside the rest of the canvas
 
-    txt('rpm', sigfigs(engine.rpm, 4));
-    txt('pressure', sigfigs(engine.volumes[0].getPressure()-engine.atmosphericpressure, 4));
-    txt('pressure2', sigfigs(engine.volumes[0].getPressure()-engine.atmosphericpressure, 4));
     txt('torque', sigfigs(engine.torque, 4));
     txt('meanrpm', sigfigs(engine.meanrpm, 4));
     txt('power', sigfigs(engine.power, 4));

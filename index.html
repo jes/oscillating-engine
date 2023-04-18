@@ -38,17 +38,12 @@ input {
     <span id="timefactorlabel">1</span>x <span id="tooslow"></span><br>
     <label for="diagramselect">Timing diagram:</label> <select id="diagramselect"></select><br>
     <button id="kick">Kick</button> <button id="pauseresume">Pause</button><br>
-    <span id="rpm">0</span> rpm
-    <br>
-    <span id="pressure">0</span> kPa <span id="pressure2-span">(<span id="pressure2">0</span> kPa)</span>
-    <br>
     <span id="torque">0</span> Nm @ <span id="meanrpm">0</span> rpm = <span id="power">0</span> W = <span id="horsepower">0</span> hp
     <br>
     <span id="efficiency">0</span>% efficiency (<span id="rawefficiency">0</span>% without losses)
     <br>
     <span id="airconsumption">0</span> kg/sec air consumption
     <br>
-    Displacement: <span id="cc">0</span> cc <span id="cc2-span">(+ <span id="cc2">0</span> cc)</span>
 </div>
 
 <div id="scope-area">
@@ -68,6 +63,7 @@ input {
 
     <label for="bore">Bore:</label> <input type="text" id="bore"> mm<br>
     <label for="stroke">Stroke:</label> <input type="text" id="stroke"> mm<br>
+    <label>Displacement:</label> <span id="cc">0</span> cc <span id="cc2-span">(+ <span id="cc2">0</span> cc)</span><br>
     <label for="deadspace">Gap above piston at TDC:</label> <input type="text" id="deadspace"> mm<br>
     <label for="rodlength">Piston+rod length:</label> <input type="text" id="rodlength"> mm <small>crank pin axis to top of piston</small><br>
     <label for="pivotseparation">Pivot separation:</label> <input type="text" id="pivotseparation"> mm<br>
