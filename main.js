@@ -22,7 +22,6 @@ var scopes = [];
 var defaults = {
     atmosphericpressure: "101.325",
     inletpressure: "50",
-    infinitevolume: true,
     reservoirvolume: "15000",
     reservoirportdiameter: "1",
     frictiontorque: "0.001",
@@ -108,6 +107,7 @@ var presets = {
         pistonlength: 8,
         roddiameter: 5,
         symmetrical: true,
+        infinitevolume: true,
         url: "https://www.modelengineeringwebsite.com/Muncaster_double_oscillator.html",
     },
 };
@@ -160,6 +160,12 @@ function draw() {
         document.getElementById('2ndport-params').style.display = 'none';
     } else {
         document.getElementById('2ndport-params').style.display = 'block';
+    }
+
+    if (checkedval('infinitevolume')) {
+        document.getElementById('reservoir-params').style.display = 'none';
+    } else  {
+        document.getElementById('reservoir-params').style.display = 'block';
     }
 
     if (engine.doubleacting) {
@@ -363,6 +369,7 @@ document.getElementById('preset').onchange = function() {
 btn('update', update);
 btn('reset', function() {
     loadPreset(txtval('preset'));
+    document.getElementById('infinitevolume').checked = true;
     for (field in defaults) {
         document.getElementById(field).value = defaults[field];
     }
