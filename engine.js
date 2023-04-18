@@ -84,7 +84,7 @@ Engine.prototype.reset = function() {
 };
 
 Engine.prototype.makePorts = function() {
-    //this.reservoir.setVolume(this.reservoirvolume);
+    this.reservoir.setVolume(this.reservoirvolume);
     this.reservoirport = new Port(0, 0, this.reservoirportdiameter, this.reservoir);
     this.supplyport = new Port(0, 0, this.reservoirportdiameter, new AirVolume(this.inletpressure));
 
