@@ -47,6 +47,12 @@ Scope.prototype.draw = function() {
         if (v > maxval) maxval = v;
     }
 
+    // draw line in middle if range is 0
+    if (minval == maxval) {
+        minval -= 1;
+        maxval += 1;
+    }
+
     let ctx = this.canvas.getContext('2d');
 
     // background
