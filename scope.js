@@ -8,8 +8,8 @@ function Scope(engine, parentElement) {
 
     let scope = this;
 
-    let fieldnames = ['Cylinder pressure (kPa above atmospheric)', 'Cylinder volume (mm^3)', 'Inlet port flow rate (kg/sec)', 'Inlet port overlap area (mm^2)', 'Exhaust port flow rate (kg/sec)', 'Exhaust port overlap area (mm^2)', 'Instantaneous rpm'];
-    let fieldvalues = ['cylpressure', 'cylvolume', 'inletportflow', 'inletportarea', 'exhaustportflow', 'exhaustportarea', 'rpm'];
+    let fieldnames = ['Reservoir pressure (kPa above atmospheric)', 'Cylinder pressure (kPa above atmospheric)', 'Cylinder volume (mm^3)', 'Inlet port flow rate (kg/sec)', 'Inlet port overlap area (mm^2)', 'Exhaust port flow rate (kg/sec)', 'Exhaust port overlap area (mm^2)', 'Instantaneous rpm'];
+    let fieldvalues = ['reservoirpressure', 'cylpressure', 'cylvolume', 'inletportflow', 'inletportarea', 'exhaustportflow', 'exhaustportarea', 'rpm'];
 
     this.div = document.createElement('div');
     this.div.style.border = "solid 1px black";
@@ -81,6 +81,7 @@ Scope.prototype.draw = function() {
 
 Scope.prototype.getValue = function() {
     switch (this.fieldselect.value) {
+        case 'reservoirpressure': return this.engine.reservoir.getPressure() - this.engine.atmosphericpressure;
         case 'cylpressure': return this.engine.volumes[0].getPressure() - this.engine.atmosphericpressure;
         case 'cylvolume': return this.engine.volumes[0].getVolume();
         case 'inletportflow': return -this.engine.inletport.flowrate;

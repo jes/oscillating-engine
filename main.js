@@ -14,7 +14,7 @@ var px_per_mm;
 
 var engine_centre_px = 150;
 
-var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'exhaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2'];
+var floatfields = ['stroke', 'portthrow', 'deadspace', 'bore', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'frictiontorque', 'loadperrpm', 'load', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'exhaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2', 'reservoirvolume', 'reservoirportdiameter'];
 var anychanged = false;
 
 var scopes = [];
@@ -22,6 +22,9 @@ var scopes = [];
 var defaults = {
     atmosphericpressure: "101.325",
     inletpressure: "50",
+    infinitevolume: true,
+    reservoirvolume: "15000",
+    reservoirportdiameter: "1",
     frictiontorque: "0.001",
     loadperrpm: "0.000025",
     load: "0",
@@ -309,6 +312,10 @@ function update() {
             document.getElementById(field+"2").value = engine[field+"2"];
         }
     }
+
+    engine.infinitevolume = checkedval('infinitevolume');
+    engine.reservoirvolume = val('reservoirvolume');
+    engine.reservoirportdiameter = val('reservoirportdiameter');
 
     engine.makePorts();
 

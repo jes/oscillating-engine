@@ -3,7 +3,7 @@ if (typeof module !== 'undefined') {
     var { Port } = require('./port.js');
 }
 
-let parameters = ['bore', 'stroke', 'portthrow', 'deadspace', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'inletpressure', 'frictiontorque', 'loadperrpm', 'load', 'airdensity', 'speedofsound', 'airflowmethod', 'straightports', 'doubleacting', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'ehaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2'];
+let parameters = ['bore', 'stroke', 'portthrow', 'deadspace', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'inletpressure', 'frictiontorque', 'loadperrpm', 'load', 'airdensity', 'speedofsound', 'airflowmethod', 'straightports', 'doubleacting', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'ehaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2', 'infinitevolume', 'reservoirvolume', 'reservoirportdiameter'];
 
 function Engine() {
     // parameters:
@@ -36,10 +36,16 @@ function Engine() {
     this.pistonlength = 5;
     this.roddiameter = 0;
 
+    // reservoir parameters
+    this.infinitevolume = true;
+    this.reservoirvolume = 15000; // mm^3
+    this.reservoirportdiameter = 1; // mm
+
     // state:
     this.volumes = [ new AirVolume(0, 0), new AirVolume(0, 0) ]; // cylinder air volumes (primary and secondary)
     this.crankposition = 0; // degrees - TDC=0
     this.rpm = 0; // rpm
+    this.reservoir = new AirVolume(this.inletpressure, this.reservoirvolume);
 
     // computed state:
     this.cylinderangle = 0; // degrees
@@ -78,7 +84,13 @@ Engine.prototype.reset = function() {
 };
 
 Engine.prototype.makePorts = function() {
-    this.inletport = new Port(this.inletportangle, this.portthrow, this.inletportdiameter, new AirVolume(this.inletpressure));
+    //this.reservoir.setVolume(this.reservoirvolume);
+    this.reservoirport = new Port(0, 0, this.reservoirportdiameter, this.reservoir);
+    this.supplyport = new Port(0, 0, this.reservoirportdiameter, new AirVolume(this.inletpressure));
+
+    if (this.infinitevolume) this.reservoir.setPressure(this.inletpressure);
+
+    this.inletport = new Port(this.inletportangle, this.portthrow, this.inletportdiameter, (this.infinitevolume ? new AirVolume(this.inletpressure) : this.reservoir));
     this.exhaustport = new Port(this.exhaustportangle, this.portthrow, this.exhaustportdiameter, new AirVolume(this.atmosphericpressure));
     this.cylinderport = new Port(this.cylinderangle, this.portthrow, this.cylinderportdiameter, this.volumes[0]);
 
@@ -123,6 +135,11 @@ Engine.prototype.step = function(dt) {
 
     this.volumes[0].setMass(this.volumes[0].getMass() + inletAirMass - exhaustAirMass);
     this.sumairmass += inletAirMass;
+
+    if (!this.infinitevolume) {
+        let massin = this.reservoirport.flow(this.supplyport, this.airflowmethod, dt);
+        this.reservoir.setMass(this.reservoir.getMass() + massin - inletAirMass);
+    }
 
     // TODO: what happens when the primary volume is exposed to the secondary ports, or vice versa? do we need to implement that? maybe we want (for each cylinder port, for each port, for each volume, compute air flow and limit to the "reducedPortArea")
 
