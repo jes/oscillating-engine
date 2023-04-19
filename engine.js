@@ -94,7 +94,7 @@ Engine.prototype.makePorts = function() {
     this.exhaustport = new Port(this.exhaustportangle, this.portthrow, this.exhaustportdiameter, new AirVolume(this.atmosphericpressure));
     this.cylinderport = new Port(this.cylinderangle, this.portthrow, this.cylinderportdiameter, this.volumes[0]);
 
-    this.inletport2 = new Port(180+this.inletportangle2, this.portthrow2, this.inletportdiameter2, new AirVolume(this.inletpressure));
+    this.inletport2 = new Port(180+this.inletportangle2, this.portthrow2, this.inletportdiameter2, (this.infinitevolume ? new AirVolume(this.inletpressure) : this.reservoir));
     this.exhaustport2 = new Port(180+this.exhaustportangle2, this.portthrow2, this.exhaustportdiameter2, new AirVolume(this.atmosphericpressure));
     this.cylinderport2 = new Port(180+this.cylinderangle, this.portthrow2, this.cylinderportdiameter2, this.volumes[1]);
 };

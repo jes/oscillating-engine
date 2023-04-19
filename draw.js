@@ -84,6 +84,33 @@ function drawPiston() {
     pop();
 }
 
+function drawReservoir() {
+    let diameter = engine.flywheeldiameter * px_per_mm;
+    let centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
+
+    push();
+
+    translate(engine_centre_px, centre_px);
+
+    let r = Math.pow(engine.reservoirvolume, 1/3) / ((4/3)*PI);
+
+    push();
+    let atmospheric_colour = color(0,255,255);
+    let inlet_colour = color(255,0,0);
+    let gas_colour = lerpColor(atmospheric_colour, inlet_colour, (engine.reservoir.getPressure()-engine.atmosphericpressure)/(engine.inletpressure-engine.atmosphericpressure));
+    gas_colour.setAlpha(127);
+    fill(gas_colour);
+
+    circle((engine.inletport.x-r)*px_per_mm, (-engine.portthrow)*px_per_mm, 2*r*px_per_mm);
+    pop();
+
+    circle((engine.inletport.x-2*r)*px_per_mm, (-engine.portthrow)*px_per_mm, engine.reservoirportdiameter*px_per_mm);
+
+    // TODO: there is still only 1 reservoir even when double-acting, but where should we draw it?
+
+    pop();
+}
+
 function drawPorts() {
     let diameter = engine.flywheeldiameter * px_per_mm;
     let centre_px = canvas.height - canvasmargin - diameter/2 - engine.pivotseparation*px_per_mm;
@@ -91,6 +118,7 @@ function drawPorts() {
     push();
 
     translate(engine_centre_px, centre_px);
+
     circle(engine.inletport.x*px_per_mm, -engine.inletport.y*px_per_mm, engine.inletport.diameter*px_per_mm);
     circle(engine.exhaustport.x*px_per_mm, -engine.exhaustport.y*px_per_mm, engine.exhaustport.diameter*px_per_mm);
     circle(engine.cylinderport.x*px_per_mm, -engine.cylinderport.y*px_per_mm, engine.cylinderport.diameter*px_per_mm);

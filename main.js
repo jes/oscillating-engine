@@ -248,6 +248,7 @@ function draw() {
     timingdiagram.draw(diameter-1);
     pop();
 
+    if (!engine.infinitevolume) drawReservoir();
     drawCylinder();
     drawPiston();
     drawPorts();
