@@ -92,7 +92,7 @@ function drawReservoir() {
 
     translate(engine_centre_px, centre_px);
 
-    let r = Math.pow(engine.reservoirvolume, 1/3) / ((4/3)*PI);
+    let r = Math.pow(engine.reservoirvolume / ((4/3)*PI), 1/3);
 
     push();
     let atmospheric_colour = color(0,255,255);
