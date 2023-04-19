@@ -149,6 +149,7 @@ function draw() {
     check('airflowmethod', engine.airflowmethod == txtval('airflowmethod'));
     check('straightports-div', engine.straightports == checkedval('straightports'));
     check('doubleacting-div', engine.doubleacting == checkedval('doubleacting'));
+    check('infinitevolume-div', engine.infinitevolume == checkedval('infinitevolume'));
 
     if (checkedval('doubleacting')) {
         document.getElementById('doubleacting-params').style.display = 'block';
