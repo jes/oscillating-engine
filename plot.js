@@ -53,6 +53,7 @@ function setLoad(l) {
 
 function setPressure(p) {
     engine.inletpressure = p;
+    engine.makePorts();
     document.getElementById('inletpressure').value = Math.round((p-engine.atmosphericpressure)*10000000)/10000000;
 }
 
