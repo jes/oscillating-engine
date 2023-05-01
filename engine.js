@@ -3,7 +3,7 @@ if (typeof module !== 'undefined') {
     var { Port } = require('./port.js');
 }
 
-let parameters = ['bore', 'stroke', 'portthrow', 'deadspace', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'inletpressure', 'frictiontorque', 'loadperrpm', 'load', 'airdensity', 'speedofsound', 'airflowmethod', 'straightports', 'doubleacting', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'ehaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2', 'infinitevolume', 'reservoirvolume', 'reservoirportdiameter'];
+let parameters = ['bore', 'stroke', 'portthrow', 'deadspace', 'rodlength', 'inletportdiameter', 'exhaustportdiameter', 'cylinderportdiameter', 'inletportangle', 'exhaustportangle', 'pivotseparation', 'flywheeldiameter', 'flywheelmomentofinertia', 'atmosphericpressure', 'inletpressure', 'frictiontorque', 'loadperrpm', 'loadperrpm2', 'load', 'airdensity', 'speedofsound', 'airflowmethod', 'straightports', 'doubleacting', 'deadspace2', 'pistonlength', 'roddiameter', 'portthrow2', 'inletportdiameter2', 'ehaustportdiameter2', 'cylinderportdiameter2', 'inletportangle2', 'exhaustportangle2', 'infinitevolume', 'reservoirvolume', 'reservoirportdiameter'];
 
 function Engine() {
     // parameters:
@@ -24,6 +24,7 @@ function Engine() {
     this.inletpressure = this.atmosphericpressure + 50; // kPa
     this.frictiontorque = 0.001; // Nm, opposing the flywheel rotation
     this.loadperrpm = 0.000025; // Nm/rpm, opposing flywheel rotation
+    this.loadperrpm2 = 0; // Nm/rpm^2, opposing flywheel rotation
     this.load = 0; // Nm
     this.airdensity = 1.204; // kg/m^3 at atmospheric pressure
     this.speedofsound = 343; // m/s
@@ -169,7 +170,7 @@ Engine.prototype.step = function(dt) {
     this.rpm += (angularacceleration * 30/Math.PI) * dt;
 
     // apply friction torque
-    let lossTorque = this.frictiontorque + (this.loadperrpm * Math.abs(this.rpm));
+    let lossTorque = this.frictiontorque + (this.loadperrpm * Math.abs(this.rpm)) + (this.loadperrpm2 * this.rpm*this.rpm);
     let friction_angaccel = lossTorque / this.flywheelmomentofinertia; // rad/s^2
     let friction_deltarpm = Math.abs((friction_angaccel * 30/Math.PI) * dt);
     if (friction_deltarpm > Math.abs(this.rpm)) {
