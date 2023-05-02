@@ -22,11 +22,11 @@ var scopes = [];
 var defaults = {
     atmosphericpressure: "101.325",
     inletpressure: "50",
-    reservoirvolume: "15000",
-    reservoirportdiameter: "1",
-    frictiontorque: "0.001",
-    loadperrpm: "0.000025",
-    loadperrpm2: "0",
+    reservoirvolume: "12000",
+    reservoirportdiameter: "0.7",
+    frictiontorque: "0.0136",
+    loadperrpm: "-0.00003347",
+    loadperrpm2: "0.0000000588",
     load: "0",
     airflowmethod: "tlv",
 };
@@ -41,6 +41,24 @@ var presets = {
         deadspace: 4.75,
         bore: 15,
         rodlength: 63,
+        inletportdiameter: 2.5,
+        exhaustportdiameter: 2.5,
+        cylinderportdiameter: 2.0,
+        inletportangle: -14.5,
+        exhaustportangle: 14.5,
+        pivotseparation: 67.5,
+        flywheeldiameter: 68,
+        flywheelmomentofinertia: "0.000203",
+        straightports: true,
+        url: "https://wigwagengine.wixsite.com/wigwag",
+    },
+
+    jeswigwag: {
+        stroke: 30,
+        portthrow: 12,
+        deadspace: 8,
+        bore: 15.2,
+        rodlength: 61,
         inletportdiameter: 2.5,
         exhaustportdiameter: 2.5,
         cylinderportdiameter: 2.0,
@@ -372,7 +390,7 @@ document.getElementById('preset').onchange = function() {
 btn('update', update);
 btn('reset', function() {
     loadPreset(txtval('preset'));
-    document.getElementById('infinitevolume').checked = true;
+    document.getElementById('infinitevolume').checked = false;
     for (field in defaults) {
         document.getElementById(field).value = defaults[field];
     }

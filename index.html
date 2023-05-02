@@ -55,6 +55,7 @@ input {
 <div id="params" style="float:left">
     <label for="preset">Preset:</label> <select id="preset">
         <option value="wigwag">Wig-Wag</option>
+        <option value="jeswigwag">Wig-Wag (jes)</option>
         <option value="stevesworkshop">Steve's Workshop</option>
         <option value="wobler">Wobler</option>
         <option value="muncasterdouble">Muncaster Double</option>
@@ -98,14 +99,14 @@ input {
 
     <label for="atmosphericpressure">Atmospheric pressure:</label> <input type="text" id="atmosphericpressure" value="101.325"> kPa<br>
     <label for="inletpressure">Supply pressure:</label> <input type="text" id="inletpressure" value="50"> kPa <small>above atmospheric</small><br>
-    <label for="infinitevolume">Supply from infinite volume?</label> <div class="checkbox-div" id="infinitevolume-div"><input type="checkbox" id="infinitevolume" checked></div><br>
+    <label for="infinitevolume">Supply from infinite volume?</label> <div class="checkbox-div" id="infinitevolume-div"><input type="checkbox" id="infinitevolume"></div><br>
         <div id="reservoir-params">
             <label for="reservoirvolume">Reservoir volume:</label> <input type="text" id="reservoirvolume" value="12000"> mm<sup>3</sup><br>
             <label for="reservoirportdiameter">Fill port diameter:</label> <input type="text" id="reservoirportdiameter" value="0.7"> mm<br>
         </div>
-    <label for="frictiontorque">Static losses:</label> <input type="text" id="frictiontorque" value="0.001"> Nm<br>
-    <label for="loadperrpm">Speed-dependent losses:</label> <input type="text" id="loadperrpm" value="0.000025"> Nm / rpm<br>
-    <label for="loadperrpm2">Square-speed-dependent losses:</label> <input type="text" id="loadperrpm2" value="0"> Nm / rpm<sup>2</sup><br>
+    <label for="frictiontorque">Static losses:</label> <input type="text" id="frictiontorque" value="0.0136"> Nm<br>
+    <label for="loadperrpm">Speed-dependent losses:</label> <input type="text" id="loadperrpm" value="-0.00003347"> Nm / rpm<br>
+    <label for="loadperrpm2">Square-speed-dependent losses:</label> <input type="text" id="loadperrpm2" value="0.0000000588"> Nm / rpm<sup>2</sup><br>
     <label for="load">Load:</label> <input type="text" id="load" value="0"> Nm<br>
     <label for="airflowmethod">Air flow method:</label> <select id="airflowmethod">
         <option value="tlv">TLV</option>
