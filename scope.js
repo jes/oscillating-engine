@@ -1,6 +1,6 @@
 function Scope(engine, parentElement) {
     this.points = [];
-    this.maxpoints = 1000;
+    this.maxpoints = 2000;
     this.engine = engine;
     this.parentElement = parentElement;
 
@@ -26,6 +26,10 @@ function Scope(engine, parentElement) {
     delbutton.innerText = '- Remove scope';
     delbutton.onclick = function() { scope.remove() };
     this.div.appendChild(delbutton);
+    let capturebutton = document.createElement('button');
+    capturebutton.innerText = 'Capture...';
+    capturebutton.onclick = function() { scope.capture() };
+    this.div.appendChild(capturebutton);
     this.div.appendChild(document.createElement('br'));
     this.canvas = document.createElement('canvas');
     // TODO: variable size?
@@ -35,16 +39,33 @@ function Scope(engine, parentElement) {
     this.parentElement.appendChild(this.div);
 };
 
+Scope.prototype.capture = function() {
+    let tsv = '';
+    let t = 0;
+    for (let i in this.points) {
+        tsv += t + "\t" + this.points[i][1] + "\n";
+        t += this.points[i][0];
+    }
+
+    let el = document.createElement('a');
+    let blob = new Blob([tsv], { type: 'text/tsv' });
+    el.href = URL.createObjectURL(blob);
+    el.download = 'capture.tsv';
+    document.body.appendChild(el);
+    el.click();
+    document.body.removeChild(el);
+};
+
 Scope.prototype.remove = function() {
     this.parentElement.removeChild(this.div);
 };
 
 Scope.prototype.draw = function() {
-    let minval = this.points.length ? this.points[0] : 0;
-    let maxval = this.points.length ? this.points[0] : 0;
+    let minval = this.points.length ? this.points[0][1] : 0;
+    let maxval = this.points.length ? this.points[0][1] : 0;
     for (let v of this.points) {
-        if (v < minval) minval = v;
-        if (v > maxval) maxval = v;
+        if (v[1] < minval) minval = v[1];
+        if (v[1] > maxval) maxval = v[1];
     }
 
     // draw line in middle if range is 0
@@ -74,7 +95,7 @@ Scope.prototype.draw = function() {
         ctx.beginPath();
         let iPlus = this.maxpoints - this.points.length;
         for (let i in this.points) {
-            ctx.lineTo((iPlus+parseInt(i))*this.canvas.width/this.maxpoints, 10+(this.canvas.height-20)*(1-(this.points[i]-minval)/(maxval-minval)));
+            ctx.lineTo((iPlus+parseInt(i))*this.canvas.width/this.maxpoints, 10+(this.canvas.height-20)*(1-(this.points[i][1]-minval)/(maxval-minval)));
         }
         ctx.stroke();
     }
@@ -101,9 +122,10 @@ Scope.prototype.getValue = function() {
     return 0;
 };
 
-Scope.prototype.update = function() {
+// dt says how long this value came after the previous one
+Scope.prototype.update = function(dt) {
     let v = this.getValue();
-    this.points.push(v);
+    this.points.push([dt, v]);
     while (this.points.length > this.maxpoints)
         this.points.shift();
 };

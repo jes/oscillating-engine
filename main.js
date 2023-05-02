@@ -33,6 +33,7 @@ var defaults = {
 
 var pvcount = 0;
 var scopecount = 0;
+var scopedt = 0;
 
 var presets = {
     wigwag: {
@@ -228,11 +229,13 @@ function draw() {
                 pvdiagram.add(engine.volumes[0].getPressure(), engine.volumes[0].getVolume(), engine.volumes[1].getPressure(), engine.volumes[1].getVolume());
                 pvcount = 0;
             }
+            scopedt += stepTime;
             if (scopecount++ >= scopecountsteps) {
                 // update scopes
                 for (let scope of scopes) {
-                    scope.update();
+                    scope.update(scopedt);
                 }
+                scopedt = 0;
                 scopecount = 0;
             }
             if (txtval('diagramselect') == 'area1')
